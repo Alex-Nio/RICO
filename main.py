@@ -11,6 +11,7 @@ import tts
 from fuzzywuzzy import fuzz
 from num2t4ru import num2text
 from bs4 import BeautifulSoup
+import os
 import sys
 import webbrowser
 import requests
@@ -18,8 +19,10 @@ import keyboard
 import subprocess
 import datetime
 import random
+import pyautogui
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
+
 
 #? Склонение часов
 def pluralRusVariant(x):
@@ -242,6 +245,34 @@ def execute_cmd(cmd: str, voice: str):
 		elif sleep == False and cmd == 'telegram_cmd':
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
 			tts.va_speak("открыла")
+		#? Музыка
+		elif sleep == False and cmd == 'play_music_cmd':
+			music_dir = (r'C:\Users\Nio\Music\YEUZ, Paul Sabin - Stalk (Original Series Soundtrack)')
+			songs = os.listdir(music_dir)
+			print(str(len(songs)) + "---треков")
+			count = 0
+			for i in songs:
+				count += 1
+				print(f'{count}.{i}')
+
+			os.startfile(os.path.join(music_dir, songs[0]))
+			tts.va_speak("Музыка запущена")
+		#? Следующий трек >>
+		elif sleep == False and cmd == 'next_track_cmd':
+			pyautogui.press('nexttrack')
+			tts.va_speak("переключаю")
+		#? Предыдущий трек <<
+		elif sleep == False and cmd == 'last_track_cmd':
+			pyautogui.press('prevtrack')
+			tts.va_speak("переключаю")
+		#? Пауза плеера ||
+		elif sleep == False and cmd == 'mute_player_cmd':
+			pyautogui.press('playpause')
+			tts.va_speak("пауза выполнена")
+		#? Пауза плеера ||
+		elif sleep == False and cmd == 'player_play_cmd':
+			pyautogui.press('playpause')
+			tts.va_speak("запускаю")
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
