@@ -8,7 +8,7 @@ from glob import glob
 device = torch.device('cpu')
 model, decoder, utils = torch.hub.load(repo_or_dir='snakers4/silero-models',
                                        model='silero_stt',
-                                       language='ru', # en, ru
+                                       language='en', # en, ru
                                        device=device)
 (read_batch, split_into_batches,
  read_audio, prepare_model_input) = utils

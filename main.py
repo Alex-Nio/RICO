@@ -71,7 +71,7 @@ def va_respond(voice: str):
 	if voice.startswith(config.VA_ALIAS):
 		cmd = recognize_cmd(filter_cmd(voice)) #!Отключено.Фильтр.Если включаем нужен таб на строки ниже
 		# cmd = recognize_cmd(voice)
-		print("КОМАНДА---> " + " " + str(cmd))
+		print("КОМАНДА---> " + " " + str(cmd['cmd']))
 
 		if cmd['cmd'] not in config.VA_CMD_LIST.keys():
 			print("Не распознала, повтори пожалуйста")		
@@ -115,6 +115,19 @@ def set_sleep_status(int):
 
 	return sleep
 
+#? Фильтр поиска
+def search_filter(search_str: str, cmd: str):
+	if cmd == "search_cmd":
+		for x in config.VA_ALIAS:
+			search_str = search_str.replace(x, "").strip()
+			print(search_str + "---2")
+		for y in config.VA_CMD_LIST:
+			print(search_str + "---search_str 1")
+			search_str = search_str.replace(y, "").strip()
+
+		return search_str
+	else: print("Ошибка")
+
 def execute_cmd(cmd: str, voice: str):
 	try:
 		#? Просыпаемся
@@ -135,9 +148,11 @@ def execute_cmd(cmd: str, voice: str):
 			text += "произносить время ..."
 			text += "управлять расположением ок+он ..."
 			text += "открывать браузер ..."
-			text += "закрывать вкладки ..."
+			text += "закрывать вкладки и о+кна ..."
 			text += "открывать редактор кода ..."
 			text += "искать через Яндекс  поиск ..."
+			text += "открывать Телеграм ..."
+			text += "запускать программы ..."
 			text += "для старта скажи-  Рико  запуск ..."
 			text += "для выхода скажи  Выход ..."
 			text += "Пока это всё, что я умею, но мне нужно учиться"
@@ -181,6 +196,8 @@ def execute_cmd(cmd: str, voice: str):
 		#? Поиск Яндекс
 		elif sleep == False and cmd == 'search_cmd':
 			def get_search(search_str):
+				search_str = search_filter(search_str, cmd)
+
 				url = 'http://yandex.ru/yandsearch?text='
 				print(url + str(search_str))
 
@@ -210,11 +227,21 @@ def execute_cmd(cmd: str, voice: str):
 		elif sleep == False and cmd == 'vs_open':
 			subprocess.Popen(r'D:\Programs\Microsoft VS Code\Code.exe')
 			tts.va_speak("редактор запущен")
-		elif sleep == False and cmd == 'test_cmd':
-			# subprocess.Popen(r'C:\Users\Nio\Desktop\Приложения\Zoom.lnk')
-			# subprocess.Popen(r'C:\Users\Nio\Desktop\Приложения\Telegram.lnk')
-			# subprocess.Popen(r'C:\Users\Nio\Desktop\Приложения\VMware Horizon Client.lnk')
-			print("Какой-то текст блять")
+		#? Запуск приложений
+		elif sleep == False and cmd == 'work_cmd':
+			subprocess.Popen(r'C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe')
+			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
+			subprocess.Popen(r'C:\Program Files (x86)\VMware\VMware Horizon View Client\vmware-view.exe')
+			tts.va_speak("запускаю программы ... Приятной работы")
+		#? Закрыть окно
+		elif sleep == False and cmd == 'escape_cmd':
+			keyboard.press("alt+f4")
+			keyboard.release("alt+f4")
+			tts.va_speak("закрыла")
+		#? Телеграм
+		elif sleep == False and cmd == 'telegram_cmd':
+			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
+			tts.va_speak("открыла")
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
