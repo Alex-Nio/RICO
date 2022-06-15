@@ -13,6 +13,12 @@ from num2t4ru import num2text
 from bs4 import BeautifulSoup
 import os
 import sys
+
+def resource_path(relative_path):
+	""" Get absolute path to resource, works for dev and for PyInstaller """
+	base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+	return os.path.join(base_path, relative_path)
+
 import webbrowser
 import requests
 import keyboard
@@ -21,8 +27,12 @@ import datetime
 import random
 import pyautogui
 
-print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
+#! Geetings Block
 
+print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
+# tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
+
+#! End of Geetings Block
 
 #? Склонение часов
 def pluralRusVariant(x):
@@ -43,22 +53,22 @@ def showHours(hours):
 
 #? Склонение минут
 def conv(n): 
-    es = ['а', 'ы', '']
-    n = n % 100
-    if n>=11 and n<=19:
-        s=es[2] 
-    else:
-        i = n % 10
-        if i == 1:
-            s = es[0] 
-        elif i in [2,3,4]:
-            s = es[1] 
-        else:
-            s = es[2] 
-    return s 
+	es = ['а', 'ы', '']
+	n = n % 100
+	if n>=11 and n<=19:
+		s=es[2] 
+	else:
+		i = n % 10
+		if i == 1:
+			s = es[0] 
+		elif i in [2,3,4]:
+			s = es[1] 
+		else:
+			s = es[2] 
+	return s 
 
 def showMinutes(minutes):
-    return ('{} минут{}'.format(minutes, conv(minutes)))
+	return ('{} минут{}'.format(minutes, conv(minutes)))
 
 #? Poisc 1.0
 def search_init(voice: str):
@@ -67,19 +77,49 @@ def search_init(voice: str):
 
 	return search_str
 
+#? Анализируем список на наличие цифр
+def numbers_analizer(data:list):
+	li = data
+	print(str(li) + "---DATA")
+	count = 0
+	for i in li:
+		count = count+1
+		try:
+			# print(str(i) + "---слово---" + str(count) + "---Позиция в строке")
+			try:
+				# Преобразуем слово в цифру
+				li[count-1] = config.words[i]
+				data = li
+			except KeyError:
+				try:
+					print(config.words[count-count%10] + config.words[count%10].lower())
+				except KeyError:
+					pass # Number out of range error
+			except IndexError:
+				pass
+		except TypeError:
+			pass
+	return data
+
 #? Распознование голоса
 def va_respond(voice: str):
-	print(voice)
-	#!Отключено. обращаются к ассистенту
+	print(voice) # строка
+	# print(type(voice.split())) # слово
+	data = voice.split()
+	#? Преобразуем буквы в строке в цифры и возвращаем новый список:
+	new_data = numbers_analizer(data)
+
+	#! Обращение к Рико
 	if voice.startswith(config.VA_ALIAS):
-		cmd = recognize_cmd(filter_cmd(voice)) #!Отключено.Фильтр.Если включаем нужен таб на строки ниже
+		cmd = recognize_cmd(filter_cmd(voice)) #! Фильтр.Если включаем нужен таб на строки ниже
 		# cmd = recognize_cmd(voice)
+		#? Логгер команд
 		print("КОМАНДА---> " + " " + str(cmd['cmd']))
 
 		if cmd['cmd'] not in config.VA_CMD_LIST.keys():
 			print("Не распознала, повтори пожалуйста")		
 		else:
-			execute_cmd(cmd['cmd'], voice)
+			execute_cmd(cmd['cmd'], voice, new_data)
 
 #? Распознователь голоса
 def recognize_cmd(cmd: str):
@@ -94,7 +134,7 @@ def recognize_cmd(cmd: str):
 
 	return rc
 
-#!Выключен. Фильтр команд
+#! Фильтр команд из конфига
 def filter_cmd(raw_voice: str):
 	cmd = raw_voice
 
@@ -110,11 +150,13 @@ def filter_cmd(raw_voice: str):
 def set_sleep_status(int):
 	global sleep
 	sleep = bool
-	
+	print(str(int) + "---NUMBER")
 	if int == 0: 
 		sleep = True
 	elif int == 1:
 		sleep = False
+	elif int == 3:
+		execute_cmd(cmd('sleep_cmd'), None)
 
 	return sleep
 
@@ -131,7 +173,29 @@ def search_filter(search_str: str, cmd: str):
 		return search_str
 	else: print("Ошибка")
 
-def execute_cmd(cmd: str, voice: str):
+#? Проверка есть ли цифры в голосовом запросе
+def check_num(list):
+	li = list
+	li = str(li)
+	print(li + "----текущий список в проверке на числа")
+	for n in li:
+		if n.isdigit():
+			keyboard_press(n)
+
+#? Инициируем нужное количество нажатий клавиатуры
+def keyboard_press(i):
+	i = int(i)
+	print(type(i))
+	count = i
+	while count != 0:
+		keyboard.press("ctrl+w")
+		keyboard.release("ctrl+w")
+		count -= 1
+		print(str(count) + "COUNT After")
+
+#? Менеджер команд
+def execute_cmd(cmd: str, voice: str, new_data):
+	new = new_data # тут хранится вся голосовая команда с цифрой для количества повторений
 	try:
 		#? Просыпаемся
 		if cmd == 'wake_cmd':
@@ -151,7 +215,8 @@ def execute_cmd(cmd: str, voice: str):
 			text += "произносить время ..."
 			text += "управлять расположением ок+он ..."
 			text += "открывать браузер ..."
-			text += "закрывать вкладки и о+кна ..."
+			text += "закрывать вкладки в нужном количестве ..."
+			text += "закрывать открытые о+кна ..."
 			text += "открывать редактор кода ..."
 			text += "искать через Яндекс  поиск ..."
 			text += "открывать Телеграм ..."
@@ -218,8 +283,8 @@ def execute_cmd(cmd: str, voice: str):
 			tts.va_speak("нашла")
 		#? Закрыть вкладку
 		elif sleep == False and cmd == 'close_current_page_cmd':
-			keyboard.press("ctrl+w")
-			keyboard.release("ctrl+w")
+			#! Выполняем количество голосовых задач
+			check_num(new)
 			tts.va_speak("закрыла")
 		#? Новая вкладка
 		elif sleep == False and cmd == 'create_new_page_cmd':
