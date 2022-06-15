@@ -21,6 +21,14 @@ a = Analysis(['main.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+x = 'cp36-win_amd64'
+datas_upd = TOC()
+
+for d in a.datas:
+    if x not in d[0] and x not in d[1]:
+        datas_upd.append(d)
+
+a.datas = datas_upd
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
