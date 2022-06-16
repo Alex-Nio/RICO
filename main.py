@@ -30,7 +30,7 @@ import pyautogui
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-# tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
+tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
 
 #! End of Geetings Block
 

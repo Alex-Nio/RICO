@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+from PyInstaller.building.datastruct import TOC
 
 block_cipher = None
 added_files = [
@@ -21,7 +21,16 @@ a = Analysis(['main.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-x = 'cp36-win_amd64'
+to_remove = ["_C", "_AES", "_ARC4", "_DES", "_DES3", "_SHA256", "_counter"]
+for b in a.binaries:
+    found = any(
+        f'{crypto}.cp310-win_amd64.pyd' in b[1]
+        for crypto in to_remove
+    )
+    if found:
+        print(f"Removing {b[1]}")
+        a.binaries.remove(b)
+x = 'cp310-win_amd64.pyd'
 datas_upd = TOC()
 
 for d in a.datas:
@@ -29,8 +38,6 @@ for d in a.datas:
         datas_upd.append(d)
 
 a.datas = datas_upd
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
