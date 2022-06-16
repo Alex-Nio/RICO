@@ -26,11 +26,12 @@ import subprocess
 import datetime
 import random
 import pyautogui
+from num2t4ru import num2text, decimal2text
 
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
+# tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
 
 #! End of Geetings Block
 
@@ -323,6 +324,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 		elif sleep == False and cmd == 'telegram_cmd':
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
 			tts.va_speak("открыла")
+		#! Плеер
 		#? Музыка
 		elif sleep == False and cmd == 'play_music_cmd':
 			music_dir = (r'C:\Users\Nio\Music\YEUZ, Paul Sabin - Stalk (Original Series Soundtrack)')
@@ -335,7 +337,6 @@ def execute_cmd(cmd: str, voice: str, new_data):
 
 			os.startfile(os.path.join(music_dir, songs[0]))
 			tts.va_speak("Музыка запущена")
-		#! Плеер
 		#? Следующий трек >>
 		elif sleep == False and cmd == 'next_track_cmd':
 			pyautogui.press('nexttrack')
@@ -361,9 +362,42 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			keyboard.press("alt+v")
 			keyboard.release("alt+v")
 			tts.va_speak("наушники включены")
+		elif sleep == False and cmd == 'weather_cmd':
+			url = 'https://pogoda1.ru/beloozersky/' # url
+			response = requests.get(url)
+			soup = BeautifulSoup(response.text, 'lxml')
+			data = soup.find_all('div', class_='weather-now-temp')
+			weatherNowValue = []
+
+			#? Берём данные о погоде
+			def initiate_take_weatherData(data, weatherNowValue):
+				print(data)
+				for i in range(0, len(data)):
+					weatherNowValue.append(data[i].text)
+					return weatherNowValue
+
+			#? Превращаем нужные данные в число
+			def convert_weatherData(data):
+				num = ""
+				for i in data:
+					if i.isdigit():
+						num = num + i
+				return int(num)
+
+			weatherDATA = initiate_take_weatherData(data, weatherNowValue)
+			weatherDATA = str(weatherDATA)
+			currentWeather = convert_weatherData(weatherDATA)
+			currentWeather = num2text(currentWeather)
+			result = f"В Белоозёрском сейчас: Плюс {currentWeather} градусов."
+			tts.va_speak(result) # Произносим погоду
+			#! END
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
+
+
+
+
 
 # начать прослушивание команд
 stt.va_listen(va_respond)
