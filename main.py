@@ -197,19 +197,20 @@ def keyboard_press(i):
 def execute_cmd(cmd: str, voice: str, new_data):
 	new = new_data # тут хранится вся голосовая команда с цифрой для количества повторений
 	try:
+		#! Статус для Рико
 		#? Просыпаемся
 		if cmd == 'wake_cmd':
 			set_sleep_status(1)
 			tts.va_speak("Запуск выполнен.Что сделать?")
-		#? Пауза
+		#? Ожидание/режим сна
 		elif sleep == False and cmd == 'sleep_cmd':
 			set_sleep_status(0)
 			tts.va_speak("хорошо, жду")
-		#? Закрыть программу
+		#? Закрыть программу RICO
 		elif cmd == 'exit_cmd':
 			tts.va_speak("закрываюсь")
 			sys.exit()
-		#? Основные функции
+		#? Основные функции/Помощь
 		if sleep == False and cmd == 'help':
 			text = "Я умею: ..."
 			text += "произносить время ..."
@@ -226,14 +227,16 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			text += "Пока это всё, что я умею, но мне нужно учиться"
 			tts.va_speak(text)
 			pass
-		#? Открыть вк
-		elif sleep == False and cmd == 'open_vk':
-			webbrowser.open('https://vk.com/eterfox')
-			tts.va_speak("открыла")
-		#? Открыть браузер
-		elif sleep == False and cmd == 'open_browser':
-			webbrowser.open('https://yandex.ru')
-			tts.va_speak("открыла")
+		#? Сброс режима ожидания
+		if cmd == 'status_check_cmd':
+			set_sleep_status(1)
+			tts.va_speak("Да да! я здесь!")
+		#! ОС Команды
+		#? Закрыть окно
+		elif sleep == False and cmd == 'escape_cmd':
+			keyboard.press("alt+f4")
+			keyboard.release("alt+f4")
+			tts.va_speak("закрыла")
 		#? Время
 		elif sleep == False and cmd == 'time_cmd':
 			now = datetime.datetime.now()
@@ -261,6 +264,20 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			keyboard.press("win+down")
 			keyboard.release("win+down")
 			tts.va_speak("готово")
+		#! Браузер
+		#? Открыть браузер
+		elif sleep == False and cmd == 'open_browser':
+			webbrowser.open('https://yandex.ru')
+			tts.va_speak("открыла")
+		#? Открыть вк
+		elif sleep == False and cmd == 'open_vk':
+			webbrowser.open('https://vk.com/eterfox')
+			tts.va_speak("открыла")
+		#? Обновить страницу
+		elif sleep == False and cmd == 'page_upd_cmd':
+			keyboard.press("ctrl+f5")
+			keyboard.release("ctrl+f5")
+			tts.va_speak("обновлено")
 		#? Поиск Яндекс
 		elif sleep == False and cmd == 'search_cmd':
 			def get_search(search_str):
@@ -291,21 +308,17 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			keyboard.press("ctrl+t")
 			keyboard.release("ctrl+t")
 			tts.va_speak("готово")
-		#? Запуск редактора кода
-		elif sleep == False and cmd == 'vs_open':
-			subprocess.Popen(r'D:\Programs\Microsoft VS Code\Code.exe')
-			tts.va_speak("редактор запущен")
-		#? Запуск приложений
+		#! Программы
+		#? Запуск программ
 		elif sleep == False and cmd == 'work_cmd':
 			subprocess.Popen(r'C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe')
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
 			subprocess.Popen(r'C:\Program Files (x86)\VMware\VMware Horizon View Client\vmware-view.exe')
 			tts.va_speak("запускаю программы ... Приятной работы")
-		#? Закрыть окно
-		elif sleep == False and cmd == 'escape_cmd':
-			keyboard.press("alt+f4")
-			keyboard.release("alt+f4")
-			tts.va_speak("закрыла")
+		#? Запуск редактора кода
+		elif sleep == False and cmd == 'vs_open':
+			subprocess.Popen(r'D:\Programs\Microsoft VS Code\Code.exe')
+			tts.va_speak("редактор запущен")
 		#? Телеграм
 		elif sleep == False and cmd == 'telegram_cmd':
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
@@ -322,6 +335,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 
 			os.startfile(os.path.join(music_dir, songs[0]))
 			tts.va_speak("Музыка запущена")
+		#! Плеер
 		#? Следующий трек >>
 		elif sleep == False and cmd == 'next_track_cmd':
 			pyautogui.press('nexttrack')
@@ -334,10 +348,19 @@ def execute_cmd(cmd: str, voice: str, new_data):
 		elif sleep == False and cmd == 'mute_player_cmd':
 			pyautogui.press('playpause')
 			tts.va_speak("пауза выполнена")
-		#? Пауза плеера ||
+		#? Запуск плеера ||
 		elif sleep == False and cmd == 'player_play_cmd':
 			pyautogui.press('playpause')
 			tts.va_speak("запускаю")
+		#! Динамики / Наушники
+		elif sleep == False and cmd == 'speakers_cmd':
+			keyboard.press("alt+c")
+			keyboard.release("alt+c")
+			tts.va_speak("динамики включены")
+		elif sleep == False and cmd == 'headphones_cmd':
+			keyboard.press("alt+v")
+			keyboard.release("alt+v")
+			tts.va_speak("наушники включены")
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
