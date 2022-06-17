@@ -27,12 +27,13 @@ import datetime
 import random
 import pyautogui
 from num2t4ru import num2text, decimal2text
+from ru_word2number import w2n
 
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-# tts.va_speak("Привет! Я Р+и+ко. Для старта выполни запуск")
-
+# tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
+print(w2n.word_to_num('шесть'))
 #! End of Geetings Block
 
 #? Склонение часов
@@ -71,36 +72,12 @@ def conv(n):
 def showMinutes(minutes):
 	return ('{} минут{}'.format(minutes, conv(minutes)))
 
-#? Poisc 1.0
+#? YA Search
 def search_init(voice: str):
 	global search_str
 	search_str = voice	
 
 	return search_str
-
-#? Анализируем список на наличие цифр
-def numbers_analizer(data:list):
-	li = data
-	print(str(li) + "---DATA")
-	count = 0
-	for i in li:
-		count = count+1
-		try:
-			# print(str(i) + "---слово---" + str(count) + "---Позиция в строке")
-			try:
-				# Преобразуем слово в цифру
-				li[count-1] = config.words[i]
-				data = li
-			except KeyError:
-				try:
-					print(config.words[count-count%10] + config.words[count%10].lower())
-				except KeyError:
-					pass # Number out of range error
-			except IndexError:
-				pass
-		except TypeError:
-			pass
-	return data
 
 #? Распознование голоса
 def va_respond(voice: str):
@@ -108,7 +85,7 @@ def va_respond(voice: str):
 	# print(type(voice.split())) # слово
 	data = voice.split()
 	#? Преобразуем буквы в строке в цифры и возвращаем новый список:
-	new_data = numbers_analizer(data)
+	new_data = value_checker(data)
 
 	#! Обращение к Рико
 	if voice.startswith(config.VA_ALIAS):
@@ -118,7 +95,8 @@ def va_respond(voice: str):
 		print("КОМАНДА---> " + " " + str(cmd['cmd']))
 
 		if cmd['cmd'] not in config.VA_CMD_LIST.keys():
-			print("Не распознала, повтори пожалуйста")		
+			print("Не распознала, повтори пожалуйста")
+			tts.va_speak("Не распознала, повтори пожалуйста")
 		else:
 			execute_cmd(cmd['cmd'], voice, new_data)
 
@@ -147,20 +125,6 @@ def filter_cmd(raw_voice: str):
 
 	return cmd
 
-#? Сон, Запуск переключение режимов
-def set_sleep_status(int):
-	global sleep
-	sleep = bool
-	print(str(int) + "---NUMBER")
-	if int == 0: 
-		sleep = True
-	elif int == 1:
-		sleep = False
-	elif int == 3:
-		execute_cmd(cmd('sleep_cmd'), None)
-
-	return sleep
-
 #? Фильтр поиска
 def search_filter(search_str: str, cmd: str):
 	if cmd == "search_cmd":
@@ -174,45 +138,63 @@ def search_filter(search_str: str, cmd: str):
 		return search_str
 	else: print("Ошибка")
 
+#? Анализируем список на наличие цифр
+def value_checker(list):
+	print(list)
+	count = 0
+	for i in list:
+		try:
+			if list[count] == 'одну':
+				list[count] = 'один'
+			elif list[count] == 'две':
+				list[count] = 'две'
+
+			numberInData = w2n.word_to_num(str(list[count]))
+			list[count] = numberInData # возвращаем цифру
+		except ValueError:
+			pass
+		except IndexError:
+			pass
+		except TypeError:
+			pass
+		count += 1
+
+	print(str(list)  + "--returned list")
+	return list
+
 #? Проверка есть ли цифры в голосовом запросе
 def check_num(list):
-	li = list
-	li = str(li)
-	print(li + "----текущий список в проверке на числа")
-	for n in li:
-		if n.isdigit():
-			keyboard_press(n)
+	dataToCheck = list
+	dataToCheck = str(dataToCheck)
+	print(dataToCheck + "----текущий список в проверке на числа")
+	dataWithNumbers = value_checker(dataToCheck)
+	print(str(dataWithNumbers) + "----res")
+	for i in dataWithNumbers:
+		if i.isdigit(): #TODO: Тут нужно добавить если следующая буква-цифра т.е. i + 1 ? Сложить цифры
+			x = int(i) # Вычисляем количество нажатий
+			return x
 
 #? Инициируем нужное количество нажатий клавиатуры
 def keyboard_press(i):
 	i = int(i)
 	print(type(i))
-	count = i
-	while count != 0:
+	while i != 0:
 		keyboard.press("ctrl+w")
 		keyboard.release("ctrl+w")
-		count -= 1
-		print(str(count) + "COUNT After")
+		print(str(i) + "COUNT After")
+		i -= 1
 
 #? Менеджер команд
 def execute_cmd(cmd: str, voice: str, new_data):
-	new = new_data # тут хранится вся голосовая команда с цифрой для количества повторений
+	dataNumbers = new_data # тут хранится вся голосовая команда с цифрой для количества повторений
 	try:
 		#! Статус для Рико
-		#? Просыпаемся
-		if cmd == 'wake_cmd':
-			set_sleep_status(1)
-			tts.va_speak("Запуск выполнен.Что сделать?")
-		#? Ожидание/режим сна
-		elif sleep == False and cmd == 'sleep_cmd':
-			set_sleep_status(0)
-			tts.va_speak("хорошо, жду")
 		#? Закрыть программу RICO
-		elif cmd == 'exit_cmd':
+		if cmd == 'exit_cmd':
 			tts.va_speak("закрываюсь")
 			sys.exit()
 		#? Основные функции/Помощь
-		if sleep == False and cmd == 'help':
+		if cmd == 'help':
 			text = "Я умею: ..."
 			text += "произносить время ..."
 			text += "управлять расположением ок+он ..."
@@ -221,7 +203,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			text += "закрывать открытые о+кна ..."
 			text += "открывать редактор кода ..."
 			text += "переключать звук и сообщать погоду ..."
-			text += "искать через Яндекс  поиск ..."
+			text += "искать через Ян+декс  поиск ..."
 			text += "открывать Телеграм ..."
 			text += "запускать программы ..."
 			text += "для старта скажи-  Рико  запуск ..."
@@ -231,36 +213,35 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			pass
 		#? Сброс режима ожидания
 		if cmd == 'status_check_cmd':
-			set_sleep_status(1)
 			tts.va_speak("Да да! я здесь!")
 		#! ОС Команды
 		#? Закрыть окно
-		elif sleep == False and cmd == 'escape_cmd':
+		elif cmd == 'escape_cmd':
 			keyboard.press("alt+f4")
 			keyboard.release("alt+f4")
 			tts.va_speak("закрыла")
 		#? Время
-		elif sleep == False and cmd == 'time_cmd':
+		elif cmd == 'time_cmd':
 			now = datetime.datetime.now()
 			text = "Сей+час" + " " + num2text(now.hour) + " " + str(showHours(now.hour)) + " " + num2text(now.minute) + " " + str(showMinutes(now.minute))
 			tts.va_speak(text)
 		#? Окно налево
-		elif sleep == False and cmd == 'window_to_left':
+		elif cmd == 'window_to_left':
 			keyboard.press("ctrl+win+x")
 			keyboard.release("ctrl+win+x")
 			tts.va_speak("готово")
 		#? Окно направо
-		elif sleep == False and cmd == 'window_to_right':
+		elif cmd == 'window_to_right':
 			keyboard.press("ctrl+win+x")
 			keyboard.release("ctrl+win+x")
 			tts.va_speak("готово")
 		#? Фулскрин
-		elif sleep == False and cmd == 'window_full_screenOnn':
+		elif cmd == 'window_full_screenOnn':
 			keyboard.press("win+up")
 			keyboard.release("win+up")
 			tts.va_speak("готово")
 		#? Свернуть окно
-		elif sleep == False and cmd == 'window_full_screenOff':
+		elif cmd == 'window_full_screenOff':
 			keyboard.press("win+down")
 			keyboard.release("win+down")
 			keyboard.press("win+down")
@@ -268,20 +249,20 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			tts.va_speak("готово")
 		#! Браузер
 		#? Открыть браузер
-		elif sleep == False and cmd == 'open_browser':
+		elif cmd == 'open_browser':
 			webbrowser.open('https://yandex.ru')
 			tts.va_speak("открыла")
 		#? Открыть вк
-		elif sleep == False and cmd == 'open_vk':
+		elif cmd == 'open_vk':
 			webbrowser.open('https://vk.com/eterfox')
 			tts.va_speak("открыла")
 		#? Обновить страницу
-		elif sleep == False and cmd == 'page_upd_cmd':
+		elif cmd == 'page_upd_cmd':
 			keyboard.press("ctrl+f5")
 			keyboard.release("ctrl+f5")
 			tts.va_speak("обновлено")
 		#? Поиск Яндекс
-		elif sleep == False and cmd == 'search_cmd':
+		elif cmd == 'search_cmd':
 			def get_search(search_str):
 				search_str = search_filter(search_str, cmd)
 
@@ -301,33 +282,35 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			get_search(str(cmd_search))
 			tts.va_speak("нашла")
 		#? Закрыть вкладку
-		elif sleep == False and cmd == 'close_current_page_cmd':
+		elif cmd == 'close_current_page_cmd':
 			#! Выполняем количество голосовых задач
-			check_num(new)
+			pushCounter = check_num(dataNumbers)
+			print(pushCounter)
+			keyboard_press(pushCounter)
 			tts.va_speak("закрыла")
 		#? Новая вкладка
-		elif sleep == False and cmd == 'create_new_page_cmd':
+		elif cmd == 'create_new_page_cmd':
 			keyboard.press("ctrl+t")
 			keyboard.release("ctrl+t")
 			tts.va_speak("готово")
 		#! Программы
 		#? Запуск программ
-		elif sleep == False and cmd == 'work_cmd':
+		elif cmd == 'work_cmd':
 			subprocess.Popen(r'C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe')
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
 			subprocess.Popen(r'C:\Program Files (x86)\VMware\VMware Horizon View Client\vmware-view.exe')
 			tts.va_speak("запускаю программы ... Приятной работы")
 		#? Запуск редактора кода
-		elif sleep == False and cmd == 'vs_open':
+		elif cmd == 'vs_open':
 			subprocess.Popen(r'D:\Programs\Microsoft VS Code\Code.exe')
 			tts.va_speak("редактор запущен")
 		#? Телеграм
-		elif sleep == False and cmd == 'telegram_cmd':
+		elif cmd == 'telegram_cmd':
 			subprocess.Popen(r'D:\Programs\Telegram Desktop\Telegram.exe')
 			tts.va_speak("открыла")
 		#! Плеер
 		#? Музыка
-		elif sleep == False and cmd == 'play_music_cmd':
+		elif cmd == 'play_music_cmd':
 			music_dir = (r'C:\Users\Nio\Music\YEUZ, Paul Sabin - Stalk (Original Series Soundtrack)')
 			songs = os.listdir(music_dir)
 			print(str(len(songs)) + "---треков")
@@ -339,31 +322,31 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			os.startfile(os.path.join(music_dir, songs[0]))
 			tts.va_speak("Музыка запущена")
 		#? Следующий трек >>
-		elif sleep == False and cmd == 'next_track_cmd':
+		elif cmd == 'next_track_cmd':
 			pyautogui.press('nexttrack')
 			tts.va_speak("переключаю")
 		#? Предыдущий трек <<
-		elif sleep == False and cmd == 'last_track_cmd':
+		elif cmd == 'last_track_cmd':
 			pyautogui.press('prevtrack')
 			tts.va_speak("переключаю")
 		#? Пауза плеера ||
-		elif sleep == False and cmd == 'mute_player_cmd':
+		elif cmd == 'mute_player_cmd':
 			pyautogui.press('playpause')
 			tts.va_speak("пауза выполнена")
 		#? Запуск плеера ||
-		elif sleep == False and cmd == 'player_play_cmd':
+		elif cmd == 'player_play_cmd':
 			pyautogui.press('playpause')
 			tts.va_speak("запускаю")
 		#! Динамики / Наушники
-		elif sleep == False and cmd == 'speakers_cmd':
+		elif cmd == 'speakers_cmd':
 			keyboard.press("alt+c")
 			keyboard.release("alt+c")
 			tts.va_speak("динамики включены")
-		elif sleep == False and cmd == 'headphones_cmd':
+		elif cmd == 'headphones_cmd':
 			keyboard.press("alt+v")
 			keyboard.release("alt+v")
 			tts.va_speak("наушники включены")
-		elif sleep == False and cmd == 'weather_cmd':
+		elif cmd == 'weather_cmd':
 			url = 'https://pogoda1.ru/beloozersky/' # url
 			response = requests.get(url)
 			soup = BeautifulSoup(response.text, 'lxml')
@@ -395,6 +378,20 @@ def execute_cmd(cmd: str, voice: str, new_data):
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
+
+#! TESTS:
+
+# a = w2n.word_to_num("один") # прогоняем слово через фильтр получаем цифру
+
+# 1. Проверяем дату
+# 2. Проходимся по всем словам в дате
+# 3. 
+
+# someData = ['закрой', 'один', 'вкладку']
+# someData = ['закрой', 'две', 'вкладки']
+
+
+# check_val(someData)
 
 
 
