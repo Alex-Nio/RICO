@@ -32,7 +32,7 @@ from ru_word2number import w2n
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
+# tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
 
 #! End of Geetings Block
 
@@ -169,20 +169,27 @@ def check_num(list):
 	print(dataToCheck + "----текущий список в проверке на числа")
 	dataWithNumbers = value_checker(dataToCheck)
 	print(str(dataWithNumbers) + "----res")
+	num = ""
 	for i in dataWithNumbers:
-		if i.isdigit(): #TODO: Тут нужно добавить если следующая буква-цифра т.е. i + 1 ? Сложить цифры
-			x = int(i) # Вычисляем количество нажатий
-			return x
+		if i.isdigit() == True: #TODO: Тут нужно добавить если следующая буква-цифра т.е. i + 1 ? Сложить цифры
+			num = num + i # Вычисляем количество нажатий
+		
+	print(str(num) + "------Число которое передаётся в функцию")
+	return num
 
 #? Инициируем нужное количество нажатий клавиатуры
-def keyboard_press(i):
+def keyboard_press_val(i, fun):
+	print(str(i) + "-----число которое принимает функция")
 	i = int(i)
-	print(type(i))
-	while i != 0:
-		keyboard.press("ctrl+w")
-		keyboard.release("ctrl+w")
-		print(str(i) + "COUNT After")
-		i -= 1
+	for z in range(i):
+		print(z)
+		fun()
+
+def keyboard_press_key():
+	print("вызов")
+	keyboard.press("ctrl+w")
+	keyboard.release("ctrl+w")
+	
 
 #? Менеджер команд
 def execute_cmd(cmd: str, voice: str, new_data):
@@ -286,7 +293,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			#! Выполняем количество голосовых задач
 			pushCounter = check_num(dataNumbers)
 			print(pushCounter)
-			keyboard_press(pushCounter)
+			keyboard_press_val(pushCounter, keyboard_press_key)
 			tts.va_speak("закрыла")
 		#? Новая вкладка
 		elif cmd == 'create_new_page_cmd':
