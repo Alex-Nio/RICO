@@ -92,21 +92,29 @@ def va_respond(voice: str):
 	#! Обращение к Рико
 	if voice.startswith(config.VA_ALIAS):
 		cmd = recognize_cmd(filter_cmd(voice)) #! Фильтр.Если включаем нужен таб на строки ниже
-		# cmd = recognize_cmd(voice)
+		
 		#? Логгер команд
 		print("КОМАНДА---> " + " " + str(cmd['cmd']))
 
-		if cmd['cmd'] not in config.VA_CMD_LIST.keys():
+		if cmd['cmd'] not in config.VA_CMD_LIST.keys() and cmd['cmd'] not in config.VA_BEH.keys():
 			print("Не распознала, повтори пожалуйста")
 			tts.va_speak("Не распознала, повтори пожалуйста")
-		else:
+		elif cmd['cmd'] in config.VA_BEH.keys():
+			execute_beh_cmd(cmd['cmd'], voice)
+		elif cmd['cmd'] in config.VA_CMD_LIST.keys():
 			execute_cmd(cmd['cmd'], voice, new_data)
 
 #? Распознователь голоса
 def recognize_cmd(cmd: str):
 	rc = {'cmd': '', 'percent': 0}
 	for c, v in config.VA_CMD_LIST.items():
-
+		for x in v:
+			vrt = fuzz.ratio(cmd, x)
+			if vrt > rc['percent']:
+				rc['cmd'] = c
+				rc['percent'] = vrt
+	
+	for c, v in config.VA_BEH.items():
 		for x in v:
 			vrt = fuzz.ratio(cmd, x)
 			if vrt > rc['percent']:
@@ -123,6 +131,9 @@ def filter_cmd(raw_voice: str):
 		cmd = cmd.replace(x, "").strip()
 
 	for x in config.VA_TBR:
+		cmd = cmd.replace(x, "").strip()
+
+	for x in config.VA_BEH:
 		cmd = cmd.replace(x, "").strip()
 
 	return cmd
@@ -389,13 +400,27 @@ def execute_cmd(cmd: str, voice: str, new_data):
 		elif cmd == 'time_management_cmd':
 			tts.va_speak("Смотрю... ...")
 			occ_check(time_list_data, time, current_occ)
-		#! END
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
-		tts.va_speak("Сперва нужно выполнить запуск")
+		tts.va_speak("Произошла ошибка во время выполнения команды")
 
 #! TESTS:
 
+#*****************************************************
+#*****************************************************
+#*****************************************************
+#TODO: Поведение *************************************
+#*****************************************************
+#*****************************************************
+#*****************************************************
+
+def execute_beh_cmd(cmd: str, voice: str):
+	try:
+		if cmd == 'thanks_cmd':
+			tts.va_speak("Пожалуйста!")
+	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
+	except NameError:
+		tts.va_speak("Произошла ошибка во время выполнения команды")
 
 # начать прослушивание команд
 stt.va_listen(va_respond)
