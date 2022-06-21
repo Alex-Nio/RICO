@@ -3,11 +3,8 @@ import datetime
 import calendar
 import tts
 from num2t4ru import num2text
-import pymorphy2
 
 
-
-morph = pymorphy2.MorphAnalyzer()
 now = datetime.datetime.now() #2022-06-20 15:43:18.024803
 current_occ = [] # Список занятий
 days = {
@@ -129,10 +126,6 @@ def occ_check(timeData, nowTime, occList):
 			
 			d = "".join(d)
 			# print(d) # результат
-
-			#* Наработки по склонениям. Ссылка: https://pymorphy2.readthedocs.io/en/stable/user/guide.html
-			# a = morph.parse(a)[0].inflect({'gent'})
-			# print(a)
 
 			#? Результат
 			result = f"Сейчас по плану: {currentPoint} до {c} часов {b} минут."
