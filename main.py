@@ -28,6 +28,8 @@ import random
 import pyautogui
 from num2t4ru import num2text, decimal2text
 from ru_word2number import w2n
+from timeManagement import *
+
 
 #! Geetings Block
 
@@ -353,6 +355,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			keyboard.press("alt+v")
 			keyboard.release("alt+v")
 			tts.va_speak("наушники включены")
+		#! Погода
 		elif cmd == 'weather_cmd':
 			url = 'https://pogoda1.ru/beloozersky/' # url
 			response = requests.get(url)
@@ -381,7 +384,10 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			currentWeather = num2text(currentWeather)
 			result = f"В Белоозёрском сейчас: Плюс {currentWeather} градусов."
 			tts.va_speak(result) # Произносим погоду
-			#! END
+		#! Расписание
+		elif cmd == 'time_management_cmd':
+			occ_check(time_list_data, time, current_occ)
+		#! END
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Сперва нужно выполнить запуск")
