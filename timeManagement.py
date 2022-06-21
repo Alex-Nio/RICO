@@ -70,7 +70,7 @@ def occ_check(timeData, nowTime, occList):
 	box = []
 	for i in timeData:
 		count += 1
-		print(i[0].value[0:5])
+		# print(i[0].value[0:5])
 
 		#? EXEL 1 TIME. Диапазон 1
 		hour = int(i[0].value[0:2])

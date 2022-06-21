@@ -29,7 +29,7 @@ import pyautogui
 from num2t4ru import num2text, decimal2text
 from ru_word2number import w2n
 from timeManagement import *
-
+import openpyxl
 
 #! Geetings Block
 
@@ -191,6 +191,7 @@ def keyboard_press_key():
 	print("вызов")
 	keyboard.press("ctrl+w")
 	keyboard.release("ctrl+w")
+	return
 	
 
 #? Менеджер команд
@@ -386,6 +387,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			tts.va_speak(result) # Произносим погоду
 		#! Расписание
 		elif cmd == 'time_management_cmd':
+			tts.va_speak("Смотрю... ...")
 			occ_check(time_list_data, time, current_occ)
 		#! END
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
