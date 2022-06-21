@@ -34,7 +34,7 @@ import openpyxl
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-# tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
+tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
 
 #! End of Geetings Block
 
@@ -89,12 +89,19 @@ def va_respond(voice: str):
 	#? Преобразуем буквы в строке в цифры и возвращаем новый список:
 	new_data = value_checker(data)
 
+	cmd = recognize_cmd(filter_cmd(voice)) #! Фильтр.
+		
+	#? Логгер команд
+	print("КОМАНДА---> " + " " + str(cmd['cmd']))
+	print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd['percent']))
+
 	#! Обращение к Рико
 	if voice.startswith(config.VA_ALIAS):
-		cmd = recognize_cmd(filter_cmd(voice)) #! Фильтр.Если включаем нужен таб на строки ниже
+		cmd = recognize_cmd(filter_cmd(voice)) #! Фильтр.
 		
 		#? Логгер команд
 		print("КОМАНДА---> " + " " + str(cmd['cmd']))
+		print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd['percent']))
 
 		if cmd['cmd'] not in config.VA_CMD_LIST.keys() and cmd['cmd'] not in config.VA_BEH.keys():
 			print("Не распознала, повтори пожалуйста")
@@ -107,6 +114,7 @@ def va_respond(voice: str):
 #? Распознователь голоса
 def recognize_cmd(cmd: str):
 	rc = {'cmd': '', 'percent': 0}
+
 	for c, v in config.VA_CMD_LIST.items():
 		for x in v:
 			vrt = fuzz.ratio(cmd, x)
@@ -133,9 +141,6 @@ def filter_cmd(raw_voice: str):
 	for x in config.VA_TBR:
 		cmd = cmd.replace(x, "").strip()
 
-	for x in config.VA_BEH:
-		cmd = cmd.replace(x, "").strip()
-
 	return cmd
 
 #? Фильтр поиска
@@ -157,9 +162,9 @@ def value_checker(list):
 	count = 0
 	for i in list:
 		try:
-			if list[count] == 'одну':
+			if list[count] == 'одну' or list[count] == 'эту' or list[count] == 'одно':
 				list[count] = 'один'
-			elif list[count] == 'две':
+			elif list[count] == 'две' or list[count] == 'дверь':
 				list[count] = 'две'
 
 			numberInData = w2n.word_to_num(str(list[count]))
@@ -194,16 +199,15 @@ def check_num(list):
 def keyboard_press_val(i, fun):
 	print(str(i) + "-----число которое принимает функция")
 	i = int(i)
-	for z in range(i):
-		print(z)
-		fun()
+	print(i)
+	[fun() for x in range(i)]
 
 def keyboard_press_key():
 	print("вызов")
 	keyboard.press("ctrl+w")
 	keyboard.release("ctrl+w")
+
 	return
-	
 
 #? Менеджер команд
 def execute_cmd(cmd: str, voice: str, new_data):
@@ -224,17 +228,15 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			text += "закрывать открытые о+кна ..."
 			text += "открывать редактор кода ..."
 			text += "переключать звук и сообщать погоду ..."
-			text += "искать через Ян+декс  поиск ..."
+			text += "искать информацию в интернете ..."
 			text += "открывать Телеграм ..."
 			text += "запускать программы ..."
-			text += "для старта скажи-  Рико  запуск ..."
+			text += "говорить что по распорядку дня ..."
+			text += "для старта назови меня по  +имени и скажи команду ..."
 			text += "для выхода скажи  Выход ..."
 			text += "Пока это всё, что я умею, но мне нужно учиться"
 			tts.va_speak(text)
 			pass
-		#? Сброс режима ожидания
-		if cmd == 'status_check_cmd':
-			tts.va_speak("Да да! я здесь!")
 		#! ОС Команды
 		#? Закрыть окно
 		elif cmd == 'escape_cmd':
@@ -398,7 +400,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
 			tts.va_speak(result) # Произносим погоду
 		#! Расписание
 		elif cmd == 'time_management_cmd':
-			tts.va_speak("Смотрю... ...")
+			tts.va_speak("Открываю расписание... ...")
 			occ_check(time_list_data, time, current_occ)
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
@@ -416,8 +418,16 @@ def execute_cmd(cmd: str, voice: str, new_data):
 
 def execute_beh_cmd(cmd: str, voice: str):
 	try:
+		#? Благодарность
 		if cmd == 'thanks_cmd':
 			tts.va_speak("Пожалуйста!")
+		#? Проверка
+		elif cmd == 'hello_cmd':
+			tts.va_speak("Привет!")
+		elif cmd == 'status_check_cmd':
+			tts.va_speak("Да да! я здесь!")
+		elif cmd == 'praise_cmd':
+			tts.va_speak("Спасибо! Стараюсь!")
 	#? Обработка ошибки если не выполнен запуск программы по ключевым словам
 	except NameError:
 		tts.va_speak("Произошла ошибка во время выполнения команды")
