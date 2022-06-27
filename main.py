@@ -11,7 +11,8 @@ from timeManagement import *
 from ru_word2number import w2n
 from num2t4ru import num2text, decimal2text
 import pyautogui
-import random
+
+# import random
 import datetime
 import subprocess
 import keyboard
@@ -24,6 +25,7 @@ from num2t4ru import num2text
 from bs4 import BeautifulSoup
 import os
 import sys
+from sound import Sound  # будем использовать статические функции класса Sound
 
 
 def resource_path(relative_path):
@@ -35,7 +37,7 @@ def resource_path(relative_path):
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-# tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
+tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
 
 #! End of Geetings Block
 
@@ -190,14 +192,18 @@ def check_num(list):
     return num
 
 
-# ? Инициируем нужное количество нажатий клавиатуры
+# ? Вычисляем нужное количество нажатий клавиатуры
 def keyboard_press_val(i, fun):
-    print(str(i) + "-----число которое принимает функция")
-    i = int(i)
-    print(i)
-    [fun("ctrl+w") for x in range(i)]
+    try:
+        print(str(i) + "-----число которое принимает функция")
+        i = int(i)
+        print(i)
+        [fun("ctrl+w") for x in range(i)]
+    except ValueError:
+        fun("ctrl+w")
 
 
+# ? Нажимаем нужную клавишу
 def keyboard_press_key(key):
     print(key + " нажатие клавиш")
     keyboard.press(key)
@@ -208,7 +214,7 @@ def keyboard_press_key(key):
 # ? Менеджер команд
 def execute_cmd(cmd: str, voice: str, new_data):
     # тут хранится вся голосовая команда с цифрой для количества повторений
-    dataNumbers = new_data
+    dataWithNumbers = new_data
     try:
         #! Статус для Рико
         # ? Закрыть программу RICO
@@ -331,7 +337,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
         # ? Закрыть вкладку
         elif cmd == "close_current_page_cmd":
             #! Выполняем количество голосовых задач
-            pushCounter = check_num(dataNumbers)
+            pushCounter = check_num(dataWithNumbers)
             print(pushCounter)
             keyboard_press_val(pushCounter, keyboard_press_key)
             tts.va_speak("закрыла")
@@ -386,6 +392,11 @@ def execute_cmd(cmd: str, voice: str, new_data):
         elif cmd == "player_play_cmd":
             pyautogui.press("playpause")
             tts.va_speak("запускаю")
+        # ? Звук
+        elif cmd == "volume_set_cmd":
+            volumeCounter = check_num(dataWithNumbers)
+            volumeCounter = int(volumeCounter)
+            Sound.volume_set(volumeCounter)
         #! Динамики / Наушники
         elif cmd == "speakers_cmd":
             keyboard_press_key("alt+c")
