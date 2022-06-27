@@ -42,12 +42,12 @@ tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асис�
 #! End of Geetings Block
 
 # ? Склонение часов
-def pluralRusVariant(x):
-    lastTwoDigits = x % 100
-    tens = lastTwoDigits // 10
+def plural_rus_variant(x):
+    last_two_digits = x % 100
+    tens = last_two_digits // 10
     if tens == 1:
         return 2
-    ones = lastTwoDigits % 10
+    ones = last_two_digits % 10
     if ones == 1:
         return 0
     if ones >= 2 and ones <= 4:
@@ -55,8 +55,8 @@ def pluralRusVariant(x):
     return 2
 
 
-def showHours(hours):
-    suffix = ["час", "часа", "часов"][pluralRusVariant(hours)]
+def show_hours(hours):
+    suffix = ["час", "часа", "часов"][plural_rus_variant(hours)]
     return "{0} {1}".format(hours, suffix)
 
 
@@ -77,7 +77,7 @@ def conv(n):
     return s
 
 
-def showMinutes(minutes):
+def show_minutes(minutes):
     return "{} минут{}".format(minutes, conv(minutes))
 
 
@@ -110,7 +110,7 @@ def va_respond(voice: str):
             print("Не распознала, повтори пожалуйста")
             tts.va_speak("Не распознала, повтори пожалуйста")
         elif cmd["cmd"] in config.VA_BEH.keys():
-            execute_beh_cmd(cmd["cmd"], voice)
+            execute_beh_cmd(cmd["cmd"])
         elif cmd["cmd"] in config.VA_CMD_LIST.keys():
             execute_cmd(cmd["cmd"], voice, new_data)
 
@@ -176,13 +176,13 @@ def value_checker(list):
 
 # ? Проверка есть ли цифры в голосовом запросе
 def check_num(list):
-    dataToCheck = list
-    dataToCheck = str(dataToCheck)
-    print(dataToCheck + "----текущий список в проверке на числа")
-    dataWithNumbers = value_checker(dataToCheck)
-    print(str(dataWithNumbers) + "----res")
+    data_to_check = list
+    data_to_check = str(data_to_check)
+    print(data_to_check + "----текущий список в проверке на числа")
+    data_with_numbers = value_checker(data_to_check)
+    print(str(data_with_numbers) + "----res")
     num = ""
-    for i in dataWithNumbers:
+    for i in data_with_numbers:
         if (
             i.isdigit() == True
         ):  # TODO: Тут нужно добавить если следующая буква-цифра т.е. i + 1 ? Сложить цифры
@@ -206,15 +206,13 @@ def keyboard_press_val(i, fun):
 # ? Нажимаем нужную клавишу
 def keyboard_press_key(key):
     print(key + " нажатие клавиш")
-    keyboard.press(key)
-    keyboard.release(key)
-    return
+    keyboard.press_and_release(key)
 
 
 # ? Менеджер команд
 def execute_cmd(cmd: str, voice: str, new_data):
     # тут хранится вся голосовая команда с цифрой для количества повторений
-    dataWithNumbers = new_data
+    data_with_numbers = new_data
     try:
         #! Статус для Рико
         # ? Закрыть программу RICO
@@ -239,7 +237,6 @@ def execute_cmd(cmd: str, voice: str, new_data):
             text += "для выхода скажи  Выход ..."
             text += "Пока это всё, что я умею, но мне нужно учиться"
             tts.va_speak(text)
-            pass
         #! ОС Команды
         # ? Закрыть окно
         elif cmd == "escape_cmd":
@@ -253,11 +250,11 @@ def execute_cmd(cmd: str, voice: str, new_data):
                 + " "
                 + num2text(now.hour)
                 + " "
-                + str(showHours(now.hour))
+                + str(show_hours(now.hour))
                 + " "
                 + num2text(now.minute)
                 + " "
-                + str(showMinutes(now.minute))
+                + str(show_minutes(now.minute))
             )
             tts.va_speak(text)
         # ? Окно налево
@@ -337,9 +334,9 @@ def execute_cmd(cmd: str, voice: str, new_data):
         # ? Закрыть вкладку
         elif cmd == "close_current_page_cmd":
             #! Выполняем количество голосовых задач
-            pushCounter = check_num(dataWithNumbers)
-            print(pushCounter)
-            keyboard_press_val(pushCounter, keyboard_press_key)
+            push_counter = check_num(data_with_numbers)
+            print(push_counter)
+            keyboard_press_val(push_counter, keyboard_press_key)
             tts.va_speak("закрыла")
         # ? Новая вкладка
         elif cmd == "create_new_page_cmd":
@@ -394,9 +391,9 @@ def execute_cmd(cmd: str, voice: str, new_data):
             tts.va_speak("запускаю")
         # ? Звук
         elif cmd == "volume_set_cmd":
-            volumeCounter = check_num(dataWithNumbers)
-            volumeCounter = int(volumeCounter)
-            Sound.volume_set(volumeCounter)
+            volume_сounter = check_num(data_with_numbers)
+            volume_сounter = int(volume_сounter)
+            Sound.volume_set(volume_сounter)
         #! Динамики / Наушники
         elif cmd == "speakers_cmd":
             keyboard_press_key("alt+c")
@@ -410,28 +407,28 @@ def execute_cmd(cmd: str, voice: str, new_data):
             response = requests.get(url)
             soup = BeautifulSoup(response.text, "lxml")
             data = soup.find_all("div", class_="weather-now-temp")
-            weatherNowValue = []
+            weather_now_value = []  # type: list[str]
 
             # ? Берём данные о погоде
-            def initiate_take_weatherData(data, weatherNowValue):
+            def initiate_take_weather_data(data, weather_now_value):
                 print(data)
                 for i in range(0, len(data)):
-                    weatherNowValue.append(data[i].text)
-                    return weatherNowValue
+                    weather_now_value.append(data[i].text)
+                    return weather_now_value
 
             # ? Превращаем нужные данные в число
-            def convert_weatherData(data):
+            def convert_weather_data(data):
                 num = ""
                 for i in data:
                     if i.isdigit():
                         num = num + i
                 return int(num)
 
-            weatherDATA = initiate_take_weatherData(data, weatherNowValue)
-            weatherDATA = str(weatherDATA)
-            currentWeather = convert_weatherData(weatherDATA)
-            currentWeather = num2text(currentWeather)
-            result = f"В Белоозёрском сейчас: Плюс {currentWeather} градусов."
+            weather_data = initiate_take_weather_data(data, weather_now_value)
+            weather_data = str(weather_data)
+            current_weather = convert_weather_data(weather_data)
+            current_weather = num2text(current_weather)
+            result = f"В Белоозёрском сейчас: Плюс {current_weather} градусов."
             tts.va_speak(result)  # Произносим погоду
         #! Расписание
         elif cmd == "time_management_cmd":
@@ -447,13 +444,13 @@ def execute_cmd(cmd: str, voice: str, new_data):
 # *****************************************************
 # *****************************************************
 # *****************************************************
-# TODO: Поведение *************************************
+# TODO: Поведение ************************************* # pylint: disable=no-name-in-module
 # *****************************************************
 # *****************************************************
 # *****************************************************
 
 
-def execute_beh_cmd(cmd: str, voice: str):
+def execute_beh_cmd(cmd: str):
     try:
         # ? Благодарность
         if cmd == "thanks_cmd":
