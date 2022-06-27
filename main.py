@@ -30,18 +30,21 @@ from sound import Sound  # будем использовать статичес�
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
-    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    base_path = getattr(sys, "_MEIPASS", os.path.dirname(
+        os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
 
 #! Geetings Block
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
+# tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
 
 #! End of Geetings Block
 
 # ? Склонение часов
+
+
 def plural_rus_variant(x):
     last_two_digits = x % 100
     tens = last_two_digits // 10
@@ -346,12 +349,19 @@ def execute_cmd(cmd: str, voice: str, new_data):
         #! Программы
         # ? Запуск программ
         elif cmd == "work_cmd":
-            subprocess.Popen(r"C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe")
+            subprocess.Popen(
+                r"C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe")
             subprocess.Popen(r"D:\Programs\Telegram Desktop\Telegram.exe")
             subprocess.Popen(
                 r"C:\Program Files (x86)\VMware\VMware Horizon View Client\vmware-view.exe"
             )
             tts.va_speak("запускаю программы ... Приятной работы")
+        elif cmd == "schedule_cmd":
+            subprocess.Popen(r"E:\Работа\Статистика\ГРАФИК.xlsx", shell=True)
+            tts.va_speak("открыла")
+        elif cmd == "calculator_cmd":
+            subprocess.Popen(r"C:\Windows\system32\win32calc.exe", shell=True)
+            tts.va_speak("открыла")
         # ? Запуск редактора кода
         elif cmd == "vs_open":
             subprocess.Popen(r"D:\Programs\Microsoft VS Code\Code.exe")
@@ -406,15 +416,13 @@ def execute_cmd(cmd: str, voice: str, new_data):
             url = "https://pogoda1.ru/beloozersky/"  # url
             response = requests.get(url)
             soup = BeautifulSoup(response.text, "lxml")
-            data = soup.find_all("div", class_="weather-now-temp")
+            data = soup.find("div", class_="weather-now-temp")
             weather_now_value = []  # type: list[str]
 
             # ? Берём данные о погоде
             def initiate_take_weather_data(data, weather_now_value):
-                print(data)
-                for i in range(0, len(data)):
-                    weather_now_value.append(data[i].text)
-                    return weather_now_value
+                weather_now_value.append(data.text)
+                return weather_now_value
 
             # ? Превращаем нужные данные в число
             def convert_weather_data(data):
