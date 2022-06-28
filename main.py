@@ -26,6 +26,9 @@ from bs4 import BeautifulSoup
 import os
 import sys
 from sound import Sound  # будем использовать статические функции класса Sound
+# Подключаем модуль для работы со временем
+import time as T
+from threading import Thread
 
 
 def resource_path(relative_path):
@@ -34,8 +37,8 @@ def resource_path(relative_path):
         os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-
 #! Geetings Block
+
 
 print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
 # tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
@@ -184,14 +187,14 @@ def check_num(list):
     print(data_to_check + "----текущий список в проверке на числа")
     data_with_numbers = value_checker(data_to_check)
     print(str(data_with_numbers) + "----res")
-    num = ""
+    num = []
     for i in data_with_numbers:
-        if (
-            i.isdigit() == True
-        ):  # TODO: Тут нужно добавить если следующая буква-цифра т.е. i + 1 ? Сложить цифры
-            num = num + i  # Вычисляем количество нажатий
-
-    print(str(num) + "------Число которое передаётся в функцию")
+        if i.isdigit() is True:  # TODO: переделать
+            i = int(i)
+            num.append(i)  # Вычисляем количество нажатий
+    num.remove(0)
+    num = "".join(map(str, num))
+    print(f'список чисел: {num}')
     return num
 
 
@@ -216,12 +219,9 @@ def keyboard_press_key(key):
 def execute_cmd(cmd: str, voice: str, new_data):
     # тут хранится вся голосовая команда с цифрой для количества повторений
     data_with_numbers = new_data
+
     try:
         #! Статус для Рико
-        # ? Закрыть программу RICO
-        if cmd == "exit_cmd":
-            tts.va_speak("закрываюсь")
-            sys.exit()
         # ? Основные функции/Помощь
         if cmd == "help":
             text = "Я умею: ..."
@@ -347,6 +347,85 @@ def execute_cmd(cmd: str, voice: str, new_data):
             keyboard.release("ctrl+t")
             tts.va_speak("готово")
         #! Программы
+        # ? Напоминание
+        elif cmd == "remind_cmd":
+            remind_str = data_with_numbers
+            remind_num = check_num(data_with_numbers)
+            remind_num = int(remind_num)
+            # список ['рик', 'и', 'напомни', 'мне', 'закрыть', 'окно', 'через', 15, 'минут']
+            print(str(remind_str) + "---data")
+            print(str(remind_num) + "---remind number")  # число
+
+            def reminder(data, remind_num):  # data=строка с цифрами
+                # Вычисляем количество минут
+                def calc_total_time(i, flag):
+                    if flag == 1:
+                        total_time = (i * 60) * 60
+                    elif flag == 2:
+                        total_time = i * 60
+                    elif flag == 3:
+                        total_time = i
+                    return total_time
+
+                # Фильтруем напоминание
+                def filtration(data):
+                    for x in data:
+                        if x in config.VA_ALIAS:
+                            data.remove(x)
+                    for x in data:
+                        if x == 'напомни':
+                            data.remove(x)
+                    for x in data:
+                        if x == 'мне':
+                            data.remove(x)
+                    for x in data:
+                        if x == 'и':
+                            data.remove(x)
+                    for x in data:
+                        if type(x) == int:
+                            data.remove(x)
+                    return data
+
+                data = filtration(data)
+
+                # Проверяем вид времени
+
+                def total_time_calculation(data, remind_num):
+                    for item in data:
+                        if item == "час" or item == "часа":
+                            r_time_hours = 1
+                            t_time = calc_total_time(remind_num, r_time_hours)
+                        elif item == "минут" or item == "минуты":
+                            r_time_minutes = 2
+                            t_time = calc_total_time(
+                                remind_num, r_time_minutes)
+                        elif item == "секунд" or item == "секунды":
+                            r_time_sec = 3
+                            t_time = calc_total_time(remind_num, r_time_sec)
+                    return t_time
+
+                t_time = total_time_calculation(data, remind_num)
+
+                data = data[0:-2]
+                data = " ".join(data)
+                # тут мы получили количество секунд
+                print(str(data) + " last operation")
+                print(t_time)  # тут мы получили количество секунд
+
+                sleep_rec(t_time, data)
+
+            def sleep_rec(t_time, data):
+                # Запуск таймера напоминания в потоке
+                local_time = t_time
+                T.sleep(local_time)
+                t_time = num2text(t_time)
+                tts.va_speak(
+                    f'Напоминаю, нужно {data}, прошло {t_time} секунд')
+
+            #! Тут производим передачу даты и запуск
+            # # Создаём новый поток
+            th = Thread(target=reminder, args=(remind_str, remind_num,))
+            th.start()
         # ? Запуск программ
         elif cmd == "work_cmd":
             subprocess.Popen(
@@ -442,6 +521,10 @@ def execute_cmd(cmd: str, voice: str, new_data):
         elif cmd == "time_management_cmd":
             tts.va_speak("Открываю расписание... ...")
             occ_check(time_list_data, time, current_occ)
+        # ? Закрыть программу RICO
+        if cmd == "exit_cmd":
+            tts.va_speak("закрываюсь")
+            sys.exit()
     # ? Обработка ошибки если не выполнен запуск программы по ключевым словам
     except NameError:
         tts.va_speak("Произошла ошибка во время выполнения команды")
