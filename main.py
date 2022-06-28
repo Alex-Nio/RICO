@@ -176,25 +176,19 @@ def value_checker(list):
             pass
         count += 1
 
-    print(str(list) + " Value checker returned list")
     return list
 
 
 # ? Проверка есть ли цифры в голосовом запросе
-def check_num(list):
-    data_to_check = list
-    data_to_check = str(data_to_check)
-    print(data_to_check + "----текущий список в проверке на числа")
-    data_with_numbers = value_checker(data_to_check)
-    print(str(data_with_numbers) + "----res")
-    num = []
-    for i in data_with_numbers:
-        if i.isdigit() is True:  # TODO: переделать
-            i = int(i)
-            num.append(i)  # Вычисляем количество нажатий
-    num.remove(0)
-    num = "".join(map(str, num))
-    print(f'список чисел: {num}')
+def check_num(data):
+
+    data_to_check = data
+    dwn = value_checker(data_to_check)
+    dwn = list(filter(lambda x: type(x) is int, dwn))  # Data With Numbers
+    num = sum(dwn)
+
+    print(f'Сумма чисел равна: {num}')
+
     return num
 
 
