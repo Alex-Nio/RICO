@@ -1,6 +1,7 @@
-VA_NAME = "Rapid information communicator optimizer-RICO v.1.1.0"
+VA_NAME = "Rapid information communicator optimizer-RICO v.3.0.0"
+VA__SHORT_NAME = "Рико / RICO"
 
-VA_VER = "1.1.0"
+VA_VER = "3.0.0"
 
 VA_ALIAS = (
     "рико",

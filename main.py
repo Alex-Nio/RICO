@@ -8,7 +8,6 @@
 #! ███████████████████████████████████████████████
 
 import webbrowser
-import openpyxl
 from timeManagement import *
 from ru_word2number import w2n
 from num2t4ru import num2text, decimal2text
@@ -551,15 +550,14 @@ def execute_beh_cmd(cmd: str):
 def tray():
     menu = ['', ['Открыть', 'Выход']]
     tooltip = 'Tooltip'
-    defaultT = '███████████████████████████████████████████████\n█────█───█────█────████─█─███───███────███────█\n█─██─██─██─██─█─██─████─█─█████─███─██─███─██─█\n█────██─██─████─██─████─█─███───███─██─███─██─█\n█─█─███─██─██─█─██─████───█████─███─██─███─██─█\n█─█─██───█────█────█████─██─█───█─█────█─█────█\n███████████████████████████████████████████████'
+    default_text = '███████████████████████████████████████████████\n█────█───█────█────████─█─███───███────███────█\n█─██─██─██─██─█─██─████─█─█████─███─██─███─██─█\n█────██─██─████─██─████─█─███───███─██─███─██─█\n█─█─███─██─██─█─██─████───█████─███─██─███─██─█\n█─█─██───█────█────█████─██─█───█─█────█─█────█\n███████████████████████████████████████████████'
 
     layout = [
-        [
-            sg.Multiline(size=(120, 10), justification='center', font='Ubuntu', reroute_stdout=False,
-                         reroute_cprint=False, write_only=True, key='-OUT-',
-                         default_text=f'{defaultT}',
-                         background_color='#2d3436', text_color='#6c5ce7',
-                         no_scrollbar=True)],
+        [sg.Multiline(size=(120, 10), justification='center', font='Ubuntu', reroute_stdout=False,
+                      reroute_cprint=False, write_only=True, key='-OUT-',
+                      default_text=f'{default_text}',
+                      background_color='#2d3436', text_color='#6c5ce7',
+                      no_scrollbar=True)],
         [sg.B('Скрыть окно'), sg.Button('Выход')]]
 
     window = sg.Window('RICO v 3.0.0', layout, finalize=False,
@@ -587,7 +585,7 @@ def tray():
             off = False
             break
 
-        # Debug
+        # ? Debugger
         # tray.show_message(title=event, message=values)
         # sg.cprint(event, values)
 
@@ -616,9 +614,8 @@ if __name__ == '__main__':
 
     #! Geetings Block
 
-    print(f"{config.VA_NAME} (v{config.VA_VER}) начал свою работу ...")
-    tts.va_speak(
-        "Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
+    print(f"{config.VA__SHORT_NAME} (v{config.VA_VER}) начал свою работу ...")
+    # tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
 
     #! End of Geetings Block
 

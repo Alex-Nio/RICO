@@ -1,2 +1,2 @@
 model_small/
-model_big/
+.mypy_cache/
