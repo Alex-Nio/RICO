@@ -1,7 +1,7 @@
 import openpyxl
 import datetime
 import calendar
-import tts
+from modules import tts
 from num2t4ru import num2text
 
 
@@ -16,6 +16,8 @@ days = {
 }
 
 # Format date
+
+
 def date_formatting(string):
     string = list(string)
     count = 0
@@ -33,7 +35,8 @@ time = time.strftime("%H:%M")
 
 mydate = date_formatting(str(now.date()))  # Текущая дата в нужном формате
 currentDay = datetime.datetime.strptime(mydate, "%Y.%m.%d")  # Текущий день
-currentDay = calendar.day_abbr[currentDay.date().weekday()]  # Получили день недели
+# Получили день недели
+currentDay = calendar.day_abbr[currentDay.date().weekday()]
 
 book = openpyxl.open("E:\\Работа\\Статистика\\ГРАФИК.xlsx", read_only=True)
 sheet = book.active
@@ -44,6 +47,8 @@ for row in range(3, 31):
     current_occ.append(val)
 
 # ? Получаем ячейки в этом дне (Понедельник)
+
+
 def time_filter(date, time, daysDict):
     now_day = date  # Mon
     now_time = time  # 16:37:19
@@ -64,6 +69,8 @@ cells_end = cells[1]  # вторая часть
 time_list_data = sheet[cells_start:cells_end]  # Ячейки в текущем дне недели
 
 # ? Принимает Ячейки, текущее время, список занятий
+
+
 def occ_check(timeData, nowTime, occList):
     count = 0
     box = []

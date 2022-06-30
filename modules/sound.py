@@ -1,4 +1,4 @@
-from paradoxis_keyboard import Keyboard
+from modules.paradoxis_keyboard import Keyboard
 
 
 class Sound:

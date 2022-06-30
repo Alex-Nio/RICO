@@ -1,2 +1,3 @@
 [MASTER]
-disable=C0116, # missing-func-docstring
+disable=C0116,unused-wildcard-import,wildcard-import,unidiomatic-typecheck,missing-module-docstring,
+; enable=
