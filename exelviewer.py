@@ -1,8 +1,8 @@
-import openpyxl
 import datetime
 import calendar
-from modules import tts
+import openpyxl
 from num2t4ru import num2text
+from modules import tts
 
 
 now = datetime.datetime.now()  # 2022-06-20 15:43:18.024803
@@ -13,11 +13,12 @@ days = {
     "Wed": ["G3", "G31"],
     "Thu": ["I3", "I31"],
     "Fri": ["K3", "K31"],
+    "Sat": ["C3", "C31"],
+    "Sun": ["C3", "C31"]
 }
 
+
 # Format date
-
-
 def date_formatting(string):
     string = list(string)
     count = 0
@@ -41,18 +42,19 @@ currentDay = calendar.day_abbr[currentDay.date().weekday()]
 book = openpyxl.open("E:\\Работа\\Статистика\\ГРАФИК.xlsx", read_only=True)
 sheet = book.active
 
+
 # ? Получаем список занятий из графика
 for row in range(3, 31):
     val = sheet[row][0].value
     current_occ.append(val)
 
+
 # ? Получаем ячейки в этом дне (Понедельник)
-
-
 def time_filter(date, time, daysDict):
     now_day = date  # Mon
     now_time = time  # 16:37:19
     dayDict = daysDict
+    val_to_find = None
     for key, value in dayDict.items():
         if key == now_day:
             val_to_find = value  # "C3","C31"
@@ -61,7 +63,6 @@ def time_filter(date, time, daysDict):
 
 # ? Результат time_filter
 cells = time_filter(currentDay, time, days)
-
 cells_start = cells[0]  # первая часть
 cells_end = cells[1]  # вторая часть
 

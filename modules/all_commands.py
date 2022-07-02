@@ -4,7 +4,7 @@ import webbrowser
 import os
 import sys
 from threading import Thread
-import time as T
+import time as TIME
 import pyautogui
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +16,7 @@ import config
 from modules import num_checker  # pylint: disable=ungrouped-imports
 from modules import time_declination
 from modules.sound import Sound
+import settings
 
 
 # ? Менеджер команд
@@ -83,11 +84,11 @@ def execute_cmd(cmd: str, voice: str, new_data):
         #! Браузер
         # ? Открыть браузер
         elif cmd == "open_browser":
-            webbrowser.open("https://yandex.ru")
+            webbrowser.open(settings.browser_start_page)
             tts.va_speak("открыла")
         # ? Открыть вк
         elif cmd == "open_vk":
-            webbrowser.open("https://vk.com/eterfox")
+            webbrowser.open(settings.vk_start_page)
             tts.va_speak("открыла")
         # ? Обновить страницу
         elif cmd == "page_upd_cmd":
@@ -159,102 +160,103 @@ def execute_cmd(cmd: str, voice: str, new_data):
             print(str(remind_num) + "---remind number")  # число
 
             def reminder(data, remind_num):  # data=строка с цифрами
-                # Вычисляем количество минут
-                def calc_total_time(i, flag):
-                    if flag == 1:
-                        total_time = (i * 60) * 60
-                    elif flag == 2:
-                        total_time = i * 60
-                    elif flag == 3:
-                        total_time = i
-                    return total_time
+                while True:
+                    # Вычисляем количество минут
+                    def calc_total_time(i, flag):
+                        if flag == 1:
+                            total_time = (i * 60) * 60
+                        elif flag == 2:
+                            total_time = i * 60
+                        elif flag == 3:
+                            total_time = i
+                        return total_time
 
-                # Фильтруем напоминание
-                def filtration(data):
-                    for x in data:
-                        if x in config.VA_ALIAS:
-                            data.remove(x)
-                    for x in data:
-                        if x == 'напомни':
-                            data.remove(x)
-                    for x in data:
-                        if x == 'мне':
-                            data.remove(x)
-                    for x in data:
-                        if x == 'и':
-                            data.remove(x)
-                    for x in data:
-                        if type(x) == int:
-                            data.remove(x)
-                    return data
+                    # Фильтруем напоминание
+                    def filtration(data):
+                        for x in data:
+                            if x in config.VA_ALIAS:
+                                data.remove(x)
+                        for x in data:
+                            if x == 'напомни':
+                                data.remove(x)
+                        for x in data:
+                            if x == 'мне':
+                                data.remove(x)
+                        for x in data:
+                            if x == 'и':
+                                data.remove(x)
+                        for x in data:
+                            if type(x) == int:
+                                data.remove(x)
+                        return data
 
-                data = filtration(data)
+                    data = filtration(data)
 
-                # Проверяем вид времени
+                    # Проверяем вид времени
 
-                def total_time_calculation(data, remind_num):
-                    for item in data:
-                        if item in ("час", "часа"):
-                            r_time_hours = 1
-                            t_time = calc_total_time(remind_num, r_time_hours)
-                        elif item in ("минут", "минуты"):
-                            r_time_minutes = 2
-                            t_time = calc_total_time(
-                                remind_num, r_time_minutes)
-                        elif item in ("секунд", "секунды"):
-                            r_time_sec = 3
-                            t_time = calc_total_time(remind_num, r_time_sec)
-                    return t_time
+                    def total_time_calculation(data, remind_num):
+                        for item in data:
+                            if item in ("час", "часа"):
+                                r_time_hours = 1
+                                t_time = calc_total_time(
+                                    remind_num, r_time_hours)
+                            elif item in ("минут", "минуты"):
+                                r_time_minutes = 2
+                                t_time = calc_total_time(
+                                    remind_num, r_time_minutes)
+                            elif item in ("секунд", "секунды"):
+                                r_time_sec = 3
+                                t_time = calc_total_time(
+                                    remind_num, r_time_sec)
+                        return t_time
 
-                t_time = total_time_calculation(data, remind_num)
+                    t_time = total_time_calculation(data, remind_num)
 
-                data = data[0:-2]
-                data = " ".join(data)
-                # тут мы получили количество секунд
-                print(str(data) + " last operation")
-                print(t_time)  # тут мы получили количество секунд
+                    data = data[0:-2]
+                    data = " ".join(data)
+                    # тут мы получили количество секунд
+                    print(str(data) + " last operation")
+                    print(t_time)  # тут мы получили количество секунд
 
-                sleep_rec(t_time, data)
+                    sleep_rec(t_time, data)
 
             def sleep_rec(t_time, data):
                 # Запуск таймера напоминания в потоке
                 local_time = t_time
-                T.sleep(local_time)
+                TIME.sleep(local_time)
                 t_time = num2text(t_time)
                 tts.va_speak(
                     f'Напоминаю, нужно {data}, прошло {t_time} секунд')
 
             #! Тут производим передачу даты и запуск
             # # Создаём новый поток
-            th = Thread(target=reminder, args=(remind_str, remind_num,))
+            th = Thread(target=reminder, daemon=True,
+                        args=(remind_str, remind_num,))
             th.start()
         # ? Запуск программ
         elif cmd == "work_cmd":
-            subprocess.Popen(
-                r"C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe")
-            subprocess.Popen(r"D:\Programs\Telegram Desktop\Telegram.exe")
-            subprocess.Popen(
-                r"C:\Program Files (x86)\VMware\VMware Horizon View Client\vmware-view.exe"
-            )
+            subprocess.Popen(settings.zoom_path)
+            subprocess.Popen(settings.telegram_path)
+            subprocess.Popen(settings.horizon_path)
             tts.va_speak("запускаю программы ... Приятной работы")
         elif cmd == "schedule_cmd":
-            subprocess.Popen(r"E:\Работа\Статистика\ГРАФИК.xlsx", shell=True)
+            subprocess.Popen(settings.schedule_path, shell=True)
             tts.va_speak("открыла")
         elif cmd == "calculator_cmd":
-            subprocess.Popen(r"C:\Windows\system32\win32calc.exe", shell=True)
+            subprocess.Popen(settings.calculator_path, shell=True)
             tts.va_speak("открыла")
         # ? Запуск редактора кода
         elif cmd == "vs_open":
-            subprocess.Popen(r"D:\Programs\Microsoft VS Code\Code.exe")
+            subprocess.Popen(settings.vs_code_path)
             tts.va_speak("редактор запущен")
         # ? Телеграм
         elif cmd == "telegram_cmd":
-            subprocess.Popen(r"D:\Programs\Telegram Desktop\Telegram.exe")
+            subprocess.Popen(settings.telegram_path)
             tts.va_speak("открыла")
         #! Плеер
         # ? Музыка
         elif cmd == "play_music_cmd":
-            music_dir = r"C:\Users\Nio\Music\YEUZ, Paul Sabin - Stalk (Original Series Soundtrack)"
+            music_dir = settings.music_dir
             songs = os.listdir(music_dir)
             print(str(len(songs)) + "---треков")
             count = 0
@@ -266,21 +268,21 @@ def execute_cmd(cmd: str, voice: str, new_data):
             tts.va_speak("Музыка запущена")
         # ? Следующий трек >>
         elif cmd == "next_track_cmd":
-            pyautogui.press("nexttrack")
             tts.va_speak("переключаю")
+            pyautogui.press("nexttrack")
         # ? Предыдущий трек <<
         elif cmd == "last_track_cmd":
-            pyautogui.press("prevtrack")
             tts.va_speak("переключаю")
+            pyautogui.press("prevtrack")
         # ? Пауза плеера ||
         elif cmd == "mute_player_cmd":
             pyautogui.press("playpause")
             tts.va_speak("пауза выполнена")
         # ? Запуск плеера ||
         elif cmd == "player_play_cmd":
-            pyautogui.press("playpause")
             tts.va_speak("запускаю")
-        # ? Звук
+            pyautogui.press("playpause")
+        # ? Установить звук в %
         elif cmd == "volume_set_cmd":
             volume_сounter = num_checker.check_num(data_with_numbers)
             volume_сounter = int(volume_сounter)
@@ -315,6 +317,8 @@ def execute_cmd(cmd: str, voice: str, new_data):
 
             weather_data = initiate_take_weather_data(data, weather_now_value)
             weather_data = str(weather_data)
+            # TODO: написать условие для + и для -
+            print(weather_data + " Текущая погода")
             current_weather = convert_weather_data(weather_data)
             current_weather = num2text(current_weather)
             result = f"В Белоозёрском сейчас: Плюс {current_weather} градусов."
@@ -326,7 +330,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
         # ? Закрыть программу RICO
         if cmd == "exit_cmd":
             tts.va_speak("закрываюсь")
-            sys.exit()
+            os._exit(1)
     # ? Обработка ошибки если не выполнен запуск программы по ключевым словам
     except NameError:
         tts.va_speak("Произошла ошибка во время выполнения команды")

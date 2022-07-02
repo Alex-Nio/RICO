@@ -20,7 +20,7 @@ from threading import Thread
 from psgtray import SystemTray
 import PySimpleGUI as sg
 import config
-from modules import tts
+from modules import all_commands, tts
 from modules import stt
 from modules import recognize
 
@@ -62,48 +62,37 @@ def tray():
         event, values = window.read()
 
         if event == tray.key:
-            sg.cprint(f'System Tray Event = ',
-                      values[event], c='white on red')
-            # use the System Tray's event as if was from the window
             event = values[event]
-
-        if event in (sg.WIN_CLOSED, 'Выход'):
-            off = False
-            break
 
         # ? Debugger
         # tray.show_message(title=event, message=values)
         # sg.cprint(event, values)
 
-        if event in ('Открыть'):
+        if event in (sg.WIN_CLOSED, 'Выход'):
+            tts.va_speak("закрываюсь")
+            tray.close()
+            window.close()
+            os._exit(1)
+
+        elif event in ('Открыть'):
             window.un_hide()
             window.bring_to_front()
-
-        if event in ('Показать окно', sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED):
+        elif event in ('Показать окно', sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED):
             window.un_hide()
             window.bring_to_front()
         elif event in ('Скрыть окно', sg.WIN_CLOSE_ATTEMPTED_EVENT):
             window.hide()
             tray.show_icon()
 
-    tray.close()
-    window.close()
-
-    while True:
-        if off is True:
-            tts.va_speak("закрываюсь")
-            os._exit()
-
 
 if __name__ == '__main__':
-    Thread(target=tray).start()
+    # запуск интерфейса
+    Thread(target=tray, daemon=True).start()
 
     #! Geetings Block
-
     print(f"{config.VA__SHORT_NAME} (v{config.VA_VER}) начал свою работу ...")
-    # tts.va_speak("Привет! Я Р+и+ко. Твой голосовой асистент. Запуск выполнен.Что сделать?")
-
+    tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
     #! End of Geetings Block
 
     # начать прослушивание команд
-    stt.va_listen(recognize.va_respond)
+    Thread(target=stt.va_listen(recognize.va_respond), daemon=True).start()
