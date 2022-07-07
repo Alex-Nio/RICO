@@ -4,11 +4,21 @@ import config
 from modules import tts
 from modules import all_commands
 from modules import beh_commands
+from modules import type_commands
+from modules import num_checker
 
 
 # ? Распознователь голоса
 def recognize_cmd(cmd: str):
-    rc = {"cmd": "", "percent": 0}  # pylint: disable=invalid-name
+    rc = {"cmd": "", "percent": 60}  # pylint: disable=invalid-name
+
+    for c, v in config.VA_TYPE.items():  # pylint: disable=invalid-name
+        for x in v:  # pylint: disable=invalid-name
+            vrt = fuzz.partial_ratio(cmd, x)
+            # vrt = fuzz.ratio(cmd, x)
+            if vrt > rc["percent"]:
+                rc["cmd"] = c
+                rc["percent"] = vrt
 
     for c, v in config.VA_CMD_LIST.items():  # pylint: disable=invalid-name
         for x in v:  # pylint: disable=invalid-name
@@ -24,12 +34,16 @@ def recognize_cmd(cmd: str):
                 rc["cmd"] = c
                 rc["percent"] = vrt
 
+    if rc['cmd'] != '':
+        print(f'{rc} : Процент распознования' + "\n")
+
     return rc
 
 
 # ? Анализируем список на наличие цифр
 def value_checker(arr):
-    print(str(arr) + " Value checker entry")
+    # print(str(arr) + " Value checker entry")
+
     count = 0
     for i in arr:
         try:
@@ -55,6 +69,9 @@ def value_checker(arr):
 def filter_cmd(raw_voice: str):
     cmd = raw_voice
 
+    for type_alias in config.VA_TYPE:
+        cmd = cmd.replace(type_alias, "").strip()
+
     for alias_name in config.VA_ALIAS:
         cmd = cmd.replace(alias_name, "").strip()
 
@@ -66,17 +83,22 @@ def filter_cmd(raw_voice: str):
 
 # ? Распознование голоса
 def va_respond(voice: str):
-    print(voice)  # строка
-    # print(type(voice.split())) # слово
+    if voice != '':
+        print("Входящая строка: " + f'{voice}')  # строка
+
     data = voice.split()
     # ? Преобразуем буквы в строке в цифры и возвращаем новый список:
     new_data = value_checker(data)
 
+    counter = num_checker.check_num(new_data)
+    counter = int(counter)
+
     cmd = recognize_cmd(filter_cmd(voice))  # ! Фильтр.
 
     # ? Логгер команд
-    print("КОМАНДА---> " + " " + str(cmd["cmd"]))
-    print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd["percent"]))
+    if cmd["cmd"] != '':
+        print("КОМАНДА---> " + " " + str(cmd["cmd"]))
+        # print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd["percent"]))
 
     #! Обращение к Рико
     if voice.startswith(config.VA_ALIAS):
@@ -86,13 +108,16 @@ def va_respond(voice: str):
         # print("КОМАНДА---> " + " " + str(cmd["cmd"]))
         # print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd["percent"]))
 
-        if (
-            cmd["cmd"] not in config.VA_CMD_LIST
-            and cmd["cmd"] not in config.VA_BEH
-        ):
-            print("Не распознала, повтори пожалуйста")
+        a = cmd["cmd"] not in config.VA_TYPE
+        b = cmd["cmd"] not in config.VA_CMD_LIST
+        c = cmd["cmd"] not in config.VA_BEH
+
+        if (a and b and c):
             tts.va_speak("Не распознала, повтори пожалуйста")
+        elif cmd["cmd"] in config.VA_TYPE:
+            type_commands.execute_type_cmd(
+                cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_BEH:
             beh_commands.execute_beh_cmd(cmd["cmd"])
         elif cmd["cmd"] in config.VA_CMD_LIST:
-            all_commands.execute_cmd(cmd["cmd"], voice, new_data)
+            all_commands.execute_cmd(cmd["cmd"], voice, new_data, counter)

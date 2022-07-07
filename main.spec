@@ -10,7 +10,7 @@ added_files = [
     ('C:/Users/Nio/Desktop/Работа/Code all/В работе/RICO/yaml',/yaml/)
 ]
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\Nio\\Desktop\\Работа\\Code all\\В работе\\RICO'],
+             pathex=['C:\\Users\\Nio\\Desktop\\Работа\\Code all\\В работе\\RICO_Git'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

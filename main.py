@@ -91,8 +91,8 @@ if __name__ == '__main__':
 
     #! Geetings Block
     print(f"{config.VA__SHORT_NAME} (v{config.VA_VER}) начал свою работу ...")
-    tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
+    # tts.va_speak("Привет! Я Р+и+ко. Запуск выполнен.Что сделать?")
     #! End of Geetings Block
 
     # начать прослушивание команд
-    Thread(target=stt.va_listen(recognize.va_respond), daemon=True).start()
+    stt.va_listen(recognize.va_respond)

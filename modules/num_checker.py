@@ -9,6 +9,7 @@ def check_num(data):
     dwn = list(filter(lambda x: type(x) is int, dwn))  # Data With Numbers
     num = sum(dwn)
 
-    print(f'Сумма чисел равна: {num}')
+    if num != 0:
+        print(f'Сумма чисел равна: {num}')
 
     return num

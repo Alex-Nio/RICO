@@ -20,10 +20,7 @@ import settings
 
 
 # ? Менеджер команд
-def execute_cmd(cmd: str, voice: str, new_data):
-    # тут хранится вся голосовая команда с цифрой для количества повторений
-    data_with_numbers = new_data
-
+def execute_cmd(cmd: str, voice: str, new_data, counter):
     try:
         #! Статус для Рико
         # ? Основные функции/Помощь
@@ -45,6 +42,19 @@ def execute_cmd(cmd: str, voice: str, new_data):
             text += "Пока это всё, что я умею, но мне нужно учиться"
             tts.va_speak(text)
         #! ОС Команды
+        # ? Клавиша "удалить всё"
+        elif cmd == "text_delete_cmd":
+            KB.keyboard_press_key("ctrl+a")
+            KB.keyboard_press_key("delete")
+        # ? Клавиша "удалить всё"
+        elif cmd == "simbol_delete_cmd":
+            KB.keyboard_press_val(counter, KB.keyboard_press_key("delete"))
+        # ? Клавиша "enter"
+        elif cmd == "enter_cmd":
+            KB.keyboard_press_val(counter, KB.keyboard_press_key("enter"))
+        # ? Знак вопроса
+        elif cmd == "question_mark_cmd":
+            KB.keyboard_press_val(counter, KB.keyboard_press_key("shift+?"))
         # ? Закрыть окно
         elif cmd == "escape_cmd":
             KB.keyboard_press_key("alt+f4")
@@ -141,9 +151,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
         # ? Закрыть вкладку
         elif cmd == "close_current_page_cmd":
             #! Выполняем количество голосовых задач
-            push_counter = num_checker.check_num(data_with_numbers)
-            print(push_counter)
-            KB.keyboard_press_val(push_counter, KB.keyboard_press_key)
+            KB.keyboard_press_val(counter, KB.keyboard_press_key)
             tts.va_speak("закрыла")
         # ? Новая вкладка
         elif cmd == "create_new_page_cmd":
@@ -152,9 +160,8 @@ def execute_cmd(cmd: str, voice: str, new_data):
         #! Программы
         # ? Напоминание
         elif cmd == "remind_cmd":
-            remind_str = data_with_numbers
-            remind_num = num_checker.check_num(data_with_numbers)
-            remind_num = int(remind_num)
+            remind_str = new_data
+            remind_num = counter
             # список ['рик', 'и', 'напомни', 'мне', 'закрыть', 'окно', 'через', 15, 'минут']
             print(str(remind_str) + "---data")
             print(str(remind_num) + "---remind number")  # число
@@ -218,6 +225,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
                     print(str(data) + " last operation")
                     print(t_time)  # тут мы получили количество секунд
 
+                    tts.va_speak('Хорошо, запомнила')
                     sleep_rec(t_time, data)
 
             def sleep_rec(t_time, data):
@@ -284,9 +292,7 @@ def execute_cmd(cmd: str, voice: str, new_data):
             pyautogui.press("playpause")
         # ? Установить звук в %
         elif cmd == "volume_set_cmd":
-            volume_сounter = num_checker.check_num(data_with_numbers)
-            volume_сounter = int(volume_сounter)
-            Sound.volume_set(volume_сounter)
+            Sound.volume_set(counter)
         #! Динамики / Наушники
         elif cmd == "speakers_cmd":
             KB.keyboard_press_key("alt+c")
