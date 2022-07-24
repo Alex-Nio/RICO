@@ -5,6 +5,7 @@ from modules import tts
 from modules import all_commands
 from modules import beh_commands
 from modules import type_commands
+from modules import reminder
 from modules import num_checker
 
 
@@ -13,6 +14,14 @@ def recognize_cmd(cmd: str):
     rc = {"cmd": "", "percent": 60}  # pylint: disable=invalid-name
 
     for c, v in config.VA_TYPE.items():  # pylint: disable=invalid-name
+        for x in v:  # pylint: disable=invalid-name
+            vrt = fuzz.partial_ratio(cmd, x)
+            # vrt = fuzz.ratio(cmd, x)
+            if vrt > rc["percent"]:
+                rc["cmd"] = c
+                rc["percent"] = vrt
+
+    for c, v in config.VA_REMID.items():  # pylint: disable=invalid-name
         for x in v:  # pylint: disable=invalid-name
             vrt = fuzz.partial_ratio(cmd, x)
             # vrt = fuzz.ratio(cmd, x)
@@ -72,6 +81,9 @@ def filter_cmd(raw_voice: str):
     for type_alias in config.VA_TYPE:
         cmd = cmd.replace(type_alias, "").strip()
 
+    for type_alias in config.VA_REMID:
+        cmd = cmd.replace(type_alias, "").strip()
+
     for alias_name in config.VA_ALIAS:
         cmd = cmd.replace(alias_name, "").strip()
 
@@ -111,11 +123,15 @@ def va_respond(voice: str):
         a = cmd["cmd"] not in config.VA_TYPE
         b = cmd["cmd"] not in config.VA_CMD_LIST
         c = cmd["cmd"] not in config.VA_BEH
+        d = cmd["cmd"] not in config.VA_REMID
 
-        if (a and b and c):
+        if (a and b and c and d):
             tts.va_speak("Не распознала, повтори пожалуйста")
         elif cmd["cmd"] in config.VA_TYPE:
             type_commands.execute_type_cmd(
+                cmd["cmd"], voice, new_data, counter)
+        elif cmd["cmd"] in config.VA_REMID:
+            reminder.execute_reminder_cmd(
                 cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_BEH:
             beh_commands.execute_beh_cmd(cmd["cmd"])
