@@ -36,17 +36,60 @@
 
 import openpyxl  # Подключаем библиотеку Openpyxl
 
-# Открываем тестовый Excel файл
-wb = openpyxl.load_workbook("E:\\Работа\\Статистика\\TODO Список.xlsx")
 
-worksheet = wb["Лист1"]  # Делаем его активным
+def myfunc(data_list):
+    # variables
+    data = data_list
+    trigger_item = "на"
 
-# ? column_b = worksheet["B"]  # Указываем нужный столбец "B"
+    # Записываем значение в ячейку
+    def change_cell_value(col, str):
+        for cell in col:
+            # Начиная с 3 ячейки и если ячейка пустая
+            if col.index(cell) > 1 and cell.value == None:
+                print(cell.coordinate)  # название ячейки
+                cell.value = str
+                break
 
-# ? for cell in column_b:
-# ?     print(cell.coordinate)  # название ячейки
-# ?     print(cell.value)  # содержимое
+    def create_wf(string, marker):
+        # Открываем тестовый Excel файл
+        work_book = openpyxl.load_workbook(".\\documents\\todo-list.xlsx")
+        worksheet = work_book["Лист1"]  # Делаем его активным
 
+        if marker == "день":
+            column = worksheet["B"]  # Указываем нужный столбец "B"
+            change_cell_value(column, string)
+            work_book.save(".\\documents\\todo-list.xlsx")
+        elif marker == "вечер":
+            column = worksheet["E"]  # Указываем нужный столбец "E"
+            change_cell_value(column, string)
+            work_book.save(".\\documents\\todo-list.xlsx")
 
-def myfunc():
-    print("test done!")
+    # Если есть 'на', то
+    # Определяем старт
+    # Определяем время суток
+    if trigger_item in data:
+        start = data.index(trigger_item)  # 5
+        daytime_marker = data[start + 1]  # Время суток
+        end = data.index(daytime_marker) + 1
+        phrase = " ".join(data[end:])
+        # print(daytime_marker)  # вечер
+        create_wf(phrase, daytime_marker)
+
+    # Если нет, то ищем индекс дел и делаем рандомный список день/вечер
+    else:
+        from random import randint
+
+        trigger_item = "дел"
+        start = data.index(trigger_item)  # 4
+        daytime_marker = randint(0, 1)
+        end = start + 1
+        phrase = " ".join(data[end:])
+
+        # Выбираем День/Вечер самостоятельно
+        if daytime_marker == 1:
+            daytime_marker = "день"
+        elif daytime_marker == 0:
+            daytime_marker = "вечер"
+
+        create_wf(phrase, daytime_marker)

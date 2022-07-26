@@ -14,7 +14,7 @@ days = {
     "Thu": ["I3", "I31"],
     "Fri": ["K3", "K31"],
     "Sat": ["C3", "C31"],
-    "Sun": ["C3", "C31"]
+    "Sun": ["C3", "C31"],
 }
 
 
@@ -39,7 +39,7 @@ currentDay = datetime.datetime.strptime(mydate, "%Y.%m.%d")  # Текущий д
 # Получили день недели
 currentDay = calendar.day_abbr[currentDay.date().weekday()]
 
-book = openpyxl.open("E:\\Работа\\Статистика\\ГРАФИК.xlsx", read_only=True)
+book = openpyxl.open(".\\documents\\schedule.xlsx", read_only=True)
 sheet = book.active
 
 
