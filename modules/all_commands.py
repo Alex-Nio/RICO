@@ -44,7 +44,10 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
             text += "для выхода скажи  Выход ..."
             text += "Пока это всё, что я умею, но мне нужно учиться"
             tts.va_speak(text)
-        #! ОС Команды
+        #! Озвучивание списка дел на День\Вечер
+        elif cmd == "check_workflow":
+            print("Команда check_workflow выполнена успешно!")
+        #! Команды для голосового ввода
         # ? Клавиша "удалить всё"
         elif cmd == "text_delete_cmd":
             KB.keyboard_press_key("ctrl+a")
@@ -58,6 +61,7 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         # ? Знак вопроса
         elif cmd == "question_mark_cmd":
             KB.keyboard_press_val(counter, KB.keyboard_press_key("shift+?"))
+        #! ОС Команды
         # ? Закрыть окно
         elif cmd == "escape_cmd":
             KB.keyboard_press_key("alt+f4")
@@ -185,8 +189,9 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         elif cmd == "joke_cmd":
 
             to_translate = pyjokes.get_joke()
-            translated = GoogleTranslator(
-                source='auto', target='ru').translate(to_translate)
+            translated = GoogleTranslator(source="auto", target="ru").translate(
+                to_translate
+            )
             tts.va_speak(translated)
 
         #! Плеер

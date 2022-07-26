@@ -5,6 +5,7 @@ from modules import tts
 from modules import all_commands
 from modules import beh_commands
 from modules import type_commands
+from modules import workflow_commands
 from modules import reminder
 from modules import num_checker
 
@@ -29,6 +30,14 @@ def recognize_cmd(cmd: str):
                 rc["cmd"] = c
                 rc["percent"] = vrt
 
+    for c, v in config.VA_CREATE.items():  # pylint: disable=invalid-name
+        for x in v:  # pylint: disable=invalid-name
+            vrt = fuzz.partial_ratio(cmd, x)
+            # vrt = fuzz.ratio(cmd, x)
+            if vrt > rc["percent"]:
+                rc["cmd"] = c
+                rc["percent"] = vrt
+
     for c, v in config.VA_CMD_LIST.items():  # pylint: disable=invalid-name
         for x in v:  # pylint: disable=invalid-name
             vrt = fuzz.ratio(cmd, x)
@@ -43,8 +52,8 @@ def recognize_cmd(cmd: str):
                 rc["cmd"] = c
                 rc["percent"] = vrt
 
-    if rc['cmd'] != '':
-        print(f'{rc} : Процент распознования' + "\n")
+    if rc["cmd"] != "":
+        print(f"{rc} : Процент распознования" + "\n")
 
     return rc
 
@@ -95,8 +104,8 @@ def filter_cmd(raw_voice: str):
 
 # ? Распознование голоса
 def va_respond(voice: str):
-    if voice != '':
-        print("Входящая строка: " + f'{voice}')  # строка
+    if voice != "":
+        print("Входящая строка: " + f"{voice}")  # строка
 
     data = voice.split()
     # ? Преобразуем буквы в строке в цифры и возвращаем новый список:
@@ -108,7 +117,7 @@ def va_respond(voice: str):
     cmd = recognize_cmd(filter_cmd(voice))  # ! Фильтр.
 
     # ? Логгер команд
-    if cmd["cmd"] != '':
+    if cmd["cmd"] != "":
         print("КОМАНДА---> " + " " + str(cmd["cmd"]))
         # print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd["percent"]))
 
@@ -124,15 +133,16 @@ def va_respond(voice: str):
         b = cmd["cmd"] not in config.VA_CMD_LIST
         c = cmd["cmd"] not in config.VA_BEH
         d = cmd["cmd"] not in config.VA_REMID
+        e = cmd["cmd"] not in config.VA_CREATE
 
-        if (a and b and c and d):
+        if a and b and c and d and e:
             tts.va_speak("Не распознала, повтори пожалуйста")
         elif cmd["cmd"] in config.VA_TYPE:
-            type_commands.execute_type_cmd(
-                cmd["cmd"], voice, new_data, counter)
+            type_commands.execute_type_cmd(cmd["cmd"], voice, new_data, counter)
+        elif cmd["cmd"] in config.VA_CREATE:
+            workflow_commands.execute_workflow_cmd(cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_REMID:
-            reminder.execute_reminder_cmd(
-                cmd["cmd"], voice, new_data, counter)
+            reminder.execute_reminder_cmd(cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_BEH:
             beh_commands.execute_beh_cmd(cmd["cmd"])
         elif cmd["cmd"] in config.VA_CMD_LIST:
