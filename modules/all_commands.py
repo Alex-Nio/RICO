@@ -19,6 +19,8 @@ from modules.sound import Sound
 import settings
 import pyjokes
 from deep_translator import GoogleTranslator
+from modules.workflow_functions import check_wf
+
 
 # ? Менеджер команд
 
@@ -46,6 +48,8 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
             tts.va_speak(text)
         #! Озвучивание списка дел на День\Вечер
         elif cmd == "check_workflow":
+            data_list = new_data
+            check_wf(data_list)
             print("Команда check_workflow выполнена успешно!")
         #! Команды для голосового ввода
         # ? Клавиша "удалить всё"
