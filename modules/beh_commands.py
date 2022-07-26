@@ -1,6 +1,7 @@
 # Поведение *************************************
 
 from modules import tts
+from random import randint
 
 
 def execute_beh_cmd(cmd: str):
@@ -15,6 +16,23 @@ def execute_beh_cmd(cmd: str):
             tts.va_speak("Да да! я здесь!")
         elif cmd == "praise_cmd":
             tts.va_speak("Спасибо! Стараюсь!")
+        elif cmd == "rude":
+            random_answer = randint(0, 5)
+
+            answers = [
+                "Как вам не стыдно... Эээххх...",
+                "Не выражайтесь в присутствии дамы",
+                "Ну это как посмотреть...",
+                "Пустяки - дело житейское",
+                "ОЙ! ОЙ!",
+                "Бывает...",
+                "Это пройдёт...",
+                "Всё не так плохо, как кажется!",
+                "Бум Бам Бакуган!",
+                "Не ругайся насяльника!",
+            ]
+
+            tts.va_speak(answers[random_answer])
     # ? Обработка ошибки если не выполнен запуск программы по ключевым словам
     except NameError:
         tts.va_speak("Произошла ошибка во время выполнения команды")

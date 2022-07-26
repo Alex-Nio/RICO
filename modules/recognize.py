@@ -147,3 +147,6 @@ def va_respond(voice: str):
             beh_commands.execute_beh_cmd(cmd["cmd"])
         elif cmd["cmd"] in config.VA_CMD_LIST:
             all_commands.execute_cmd(cmd["cmd"], voice, new_data, counter)
+    else:
+        if cmd["cmd"] in config.VA_BEH:
+            beh_commands.execute_beh_cmd(cmd["cmd"])

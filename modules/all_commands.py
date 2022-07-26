@@ -51,6 +51,9 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
             data_list = new_data
             check_wf(data_list)
             print("Команда check_workflow выполнена успешно!")
+        elif cmd == "open_workflow":
+            subprocess.Popen(settings.todo_list_path, shell=True)
+            tts.va_speak("открыла")
         #! Команды для голосового ввода
         # ? Клавиша "удалить всё"
         elif cmd == "text_delete_cmd":
