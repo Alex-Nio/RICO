@@ -48,7 +48,7 @@ def add_wf(data_list):
         for cell in col:
             # Начиная с 3 ячейки и если ячейка пустая
             if col.index(cell) > 1 and cell.value == None:
-                print(cell.coordinate)  # название ячейки
+                # print(cell.coordinate)  # название ячейки
                 cell.value = str
                 break
 
@@ -75,7 +75,12 @@ def add_wf(data_list):
         end = data.index(daytime_marker) + 1
         phrase = " ".join(data[end:])
         # print(daytime_marker)  # вечер
-        create_wf(phrase, daytime_marker)
+        if phrase != "":
+            create_wf(phrase, daytime_marker)
+            tts.va_speak("Добавила!")
+        else:
+            print("Ошибка. Нечего добавлять в список дел")
+            tts.va_speak("Не поняла. Что нужно добавить?")
 
     # Если нет, то ищем индекс 'дел' и рандомно выбираем день/вечер
     else:
@@ -93,7 +98,12 @@ def add_wf(data_list):
         elif daytime_marker == 0:
             daytime_marker = "вечер"
 
-        create_wf(phrase, daytime_marker)
+        if phrase != "":
+            create_wf(phrase, daytime_marker)
+            tts.va_speak("Добавила!")
+        else:
+            print("Ошибка. Нечего добавлять в список дел")
+            tts.va_speak("Не поняла. Что нужно добавить?")
 
 
 #! _________________________________________________________________________

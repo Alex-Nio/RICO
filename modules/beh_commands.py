@@ -17,7 +17,7 @@ def execute_beh_cmd(cmd: str):
         elif cmd == "praise_cmd":
             tts.va_speak("Спасибо! Стараюсь!")
         elif cmd == "rude":
-            random_answer = randint(0, 5)
+            random_answer = randint(0, 9)
 
             answers = [
                 "Как вам не стыдно... Эээххх...",

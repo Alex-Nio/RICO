@@ -6,6 +6,8 @@ from modules import all_commands
 from modules import beh_commands
 from modules import type_commands
 from modules import workflow_commands
+from modules import YASearch_commands
+from modules import wiki_parcer_commands
 from modules import reminder
 from modules import num_checker
 
@@ -15,6 +17,22 @@ def recognize_cmd(cmd: str):
     rc = {"cmd": "", "percent": 60}  # pylint: disable=invalid-name
 
     for c, v in config.VA_TYPE.items():  # pylint: disable=invalid-name
+        for x in v:  # pylint: disable=invalid-name
+            vrt = fuzz.partial_ratio(cmd, x)
+            # vrt = fuzz.ratio(cmd, x)
+            if vrt > rc["percent"]:
+                rc["cmd"] = c
+                rc["percent"] = vrt
+
+    for c, v in config.VA_YASearch.items():  # pylint: disable=invalid-name
+        for x in v:  # pylint: disable=invalid-name
+            vrt = fuzz.partial_ratio(cmd, x)
+            # vrt = fuzz.ratio(cmd, x)
+            if vrt > rc["percent"]:
+                rc["cmd"] = c
+                rc["percent"] = vrt
+
+    for c, v in config.VA_WIKI.items():  # pylint: disable=invalid-name
         for x in v:  # pylint: disable=invalid-name
             vrt = fuzz.partial_ratio(cmd, x)
             # vrt = fuzz.ratio(cmd, x)
@@ -90,6 +108,12 @@ def filter_cmd(raw_voice: str):
     for type_alias in config.VA_TYPE:
         cmd = cmd.replace(type_alias, "").strip()
 
+    for search_alias in config.VA_YASearch:
+        cmd = cmd.replace(search_alias, "").strip()
+
+    for wiki_alias in config.VA_WIKI:
+        cmd = cmd.replace(wiki_alias, "").strip()
+
     for type_alias in config.VA_REMID:
         cmd = cmd.replace(type_alias, "").strip()
 
@@ -134,11 +158,17 @@ def va_respond(voice: str):
         c = cmd["cmd"] not in config.VA_BEH
         d = cmd["cmd"] not in config.VA_REMID
         e = cmd["cmd"] not in config.VA_CREATE
+        f = cmd["cmd"] not in config.VA_WIKI
+        g = cmd["cmd"] not in config.VA_YASearch
 
-        if a and b and c and d and e:
+        if a and b and c and d and e and f and g:
             tts.va_speak("Не распознала, повтори пожалуйста")
         elif cmd["cmd"] in config.VA_TYPE:
             type_commands.execute_type_cmd(cmd["cmd"], voice, new_data, counter)
+        elif cmd["cmd"] in config.VA_YASearch:
+            YASearch_commands.execute_search_cmd(cmd["cmd"], voice, new_data, counter)
+        elif cmd["cmd"] in config.VA_WIKI:
+            wiki_parcer_commands.execute_wiki_cmd(cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_CREATE:
             workflow_commands.execute_workflow_cmd(cmd["cmd"], voice, new_data, counter)
         elif cmd["cmd"] in config.VA_REMID:

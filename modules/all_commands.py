@@ -15,6 +15,7 @@ from modules import tts  # pylint: disable=ungrouped-imports
 import config
 from modules import num_checker  # pylint: disable=ungrouped-imports
 from modules import time_declination
+from modules import methods
 from modules.sound import Sound
 import settings
 import pyjokes
@@ -118,50 +119,6 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         elif cmd == "page_upd_cmd":
             KB.keyboard_press_key("ctrl+f5")
             tts.va_speak("обновлено")
-        #! Поиск Яндекс
-        elif cmd == "search_cmd":
-            # ? YA Search
-            def search_init(voice: str):
-                search_str = voice
-                print(search_str + "поисковый запрос")
-
-                return search_str
-
-            # ? Фильтр поиска
-            def search_filter(search_str: str, cmd: str):
-                if cmd == "search_cmd":
-                    # Убираем имя помошника
-                    for x in config.VA_ALIAS:
-                        search_str = search_str.replace(x, "").strip()
-                        print(search_str + " Поисковая строка без имени помощника")
-
-                    return search_str
-                else:
-                    print("Ошибка")
-
-            # ? Подставляем запрос в урл
-            def get_search(search_str):
-                search_str = search_filter(search_str, cmd)
-
-                url = "http://yandex.ru/yandsearch?text="
-
-                print(url + str(search_str) + " " + " --> Сформированный URL")
-                # ? Убираем поисковое слово из строки
-                if "поиск" in search_str:
-                    webbrowser.open(url + search_str.replace("поиск", ""))
-                elif "найди" in search_str:
-                    webbrowser.open(url + search_str.replace("найди", ""))
-                elif "найти" in search_str:
-                    webbrowser.open(url + search_str.replace("найти", ""))
-
-                print(search_str + " Поисковая строка без ключевого слова")
-                # webbrowser.open(url)
-                requests.get(url + search_str)
-
-            search_req = search_init(voice)
-            tts.va_speak("нашла")
-            print(str(search_req) + " Поисковый запрос")
-            get_search(str(search_req))
         # ? Закрыть вкладку
         elif cmd == "close_current_page_cmd":
             #! Выполняем количество голосовых задач
