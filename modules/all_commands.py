@@ -69,6 +69,9 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         # ? Знак вопроса
         elif cmd == "question_mark_cmd":
             KB.keyboard_press_val(counter, KB.keyboard_press_key("shift+?"))
+        # ? Пробел
+        elif cmd == "space_cmd":
+            KB.keyboard_press_val(counter, KB.keyboard_press_key("space"))
         #! ОС Команды
         # ? Закрыть окно
         elif cmd == "escape_cmd":

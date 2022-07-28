@@ -140,16 +140,11 @@ def va_respond(voice: str):
 
     # ? Логгер команд
     if cmd["cmd"] != "":
-        print(Fore.RED + "КОМАНДА---> " + Back.GREEN + str(cmd["cmd"]))
-    if voice != "":
         print(
-            "\033[43m"
-            + "Входящая строка:"
-            + Style.RESET_ALL
-            + f" {voice}"
-            + "\033[0m"
-            + "\n"
-        )  # строка
+            Fore.RED + "КОМАНДА---> " + Back.GREEN + str(cmd["cmd"] + Style.RESET_ALL)
+        )
+    if voice != "":
+        print(Fore.GREEN + "Входящая строка:" + Style.RESET_ALL + f" {voice}")  # строка
 
     #! Обращение к Рико
     if voice.startswith(config.VA_ALIAS):

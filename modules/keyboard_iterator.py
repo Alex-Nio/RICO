@@ -1,12 +1,11 @@
 import keyboard
-
+from colorama import Fore, Back, Style
 
 # ? Вычисляем нужное количество нажатий клавиатуры
 def keyboard_press_val(i, fun):
     try:
-        print(str(i) + "-----число которое принимает функция")
+        print(Fore.BLUE + "Количество нажатий: " + Fore.CYAN + str(i) + Style.RESET_ALL)
         i = int(i)
-        print(i)
         [fun("ctrl+w") for x in range(i)]
     except ValueError:
         fun("ctrl+w")
@@ -14,5 +13,5 @@ def keyboard_press_val(i, fun):
 
 # ? Нажимаем нужную клавишу
 def keyboard_press_key(key):
-    print(key + " нажатие клавиш")
+    print(Fore.BLUE + "Нажатые клавиши: " + Fore.CYAN + key + Style.RESET_ALL)
     keyboard.press_and_release(key)

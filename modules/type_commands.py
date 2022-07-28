@@ -16,7 +16,8 @@ import numpy as np
 import keyboard
 import config
 from modules import tts
-
+from modules import methods
+from colorama import Fore, Style
 
 MAX_SUBSEQUENCE_LEN = 200
 # model_file = r'/punctuation/model_ru_punctuator_h256_lr0.02.pcl'
@@ -37,14 +38,15 @@ def convert_punctuation_to_readable(punct_token):
 def restore(text, word_vocabulary, reverse_punctuation_vocabulary, model):
     i = 0
     while True:
-        string_to_punct = ''
-        subsequence = text[i:i+MAX_SUBSEQUENCE_LEN]
+        string_to_punct = ""
+        subsequence = text[i : i + MAX_SUBSEQUENCE_LEN]
 
         if len(subsequence) == 0:
             break
 
-        converted_subsequence = [word_vocabulary.get(
-            w, word_vocabulary[data.UNK]) for w in subsequence]
+        converted_subsequence = [
+            word_vocabulary.get(w, word_vocabulary[data.UNK]) for w in subsequence
+        ]
 
         y = predict(to_array(converted_subsequence), model)
 
@@ -71,16 +73,17 @@ def restore(text, word_vocabulary, reverse_punctuation_vocabulary, model):
             step = len(subsequence) - 1
 
         for j in range(step):
-            string_to_punct += (punctuations[j] +
-                                " " if punctuations[j] != data.SPACE else " ")
+            string_to_punct += (
+                punctuations[j] + " " if punctuations[j] != data.SPACE else " "
+            )
             if j < step - 1:
-                string_to_punct += subsequence[1+j]
+                string_to_punct += subsequence[1 + j]
 
         if subsequence[-1] == data.END:
             break
 
         i += step
-    return(string_to_punct)
+    return string_to_punct
 
 
 def predict(x, model):
@@ -89,65 +92,81 @@ def predict(x, model):
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vocab_len = len(data.read_vocabulary(data.WORD_VOCAB_FILE))
-x_len = vocab_len if vocab_len < data.MAX_WORD_VOCABULARY_SIZE else data.MAX_WORD_VOCABULARY_SIZE + \
-    data.MIN_WORD_COUNT_IN_VOCAB
+x_len = (
+    vocab_len
+    if vocab_len < data.MAX_WORD_VOCABULARY_SIZE
+    else data.MAX_WORD_VOCABULARY_SIZE + data.MIN_WORD_COUNT_IN_VOCAB
+)
 x = np.ones((x_len, main.MINIBATCH_SIZE)).astype(int)
 
-print("Loading model parameters...")
-net, _ = models.load(
-    'punctuation\model_ru_punctuator_h256_lr0.02.pcl', x)
+# print("Loading model parameters...")
+net, _ = models.load("punctuation\model_ru_punctuator_h256_lr0.02.pcl", x)
 
-print("Building model...")
+# print("Building model...")
 
 word_vocabulary = net.x_vocabulary
 punctuation_vocabulary = net.y_vocabulary
 
-reverse_word_vocabulary = {
-    v: k for k, v in word_vocabulary.items()}
-reverse_punctuation_vocabulary = {
-    v: k for k, v in punctuation_vocabulary.items()}
+reverse_word_vocabulary = {v: k for k, v in word_vocabulary.items()}
+reverse_punctuation_vocabulary = {v: k for k, v in punctuation_vocabulary.items()}
 for key, value in reverse_punctuation_vocabulary.items():
-    if value == '.PERIOD':
-        reverse_punctuation_vocabulary[key] = '.'
-    if value == ',COMMA':
-        reverse_punctuation_vocabulary[key] = ','
-    if value == '?QUESTIONMARK':
-        reverse_punctuation_vocabulary[key] = '?'
+    if value == ".PERIOD":
+        reverse_punctuation_vocabulary[key] = "."
+    if value == ",COMMA":
+        reverse_punctuation_vocabulary[key] = ","
+    if value == "?QUESTIONMARK":
+        reverse_punctuation_vocabulary[key] = "?"
 
 
 def execute_type_cmd(cmd: str, voice: str, new_data, counter):
     try:
         # ? ПЕЧАТЬ с команды "Напиши"
         if cmd == "type_cmd":
-            print(f'"Команда:" {voice}')
-            test = voice.split()
-            test = [
-                x for x in test if x not in config.VA_ALIAS]
-            test = [
-                x for x in test if x not in config.VA_TYPE['type_cmd']]
-            test = " ".join(test)
+            alias_names = config.VA_ALIAS
+            replace_aliases = config.VA_TYPE["type_cmd"]
+            voice_to_type = voice.split()
 
-            print(f'Строка для ввода:  {test}')
+            text_to_type = methods.alias_replacer(
+                alias_names, replace_aliases, voice_to_type
+            )
 
-            input_text = test
+            text_to_type = " ".join(text_to_type)
+
+            print(
+                Fore.CYAN + "Строка для печати:" + Style.RESET_ALL + f" {text_to_type}"
+            )
+
+            input_text = text_to_type
 
             if len(input_text) == 0:
                 sys.exit("Input file empty.")
 
-            text = [w for w in input_text.split(
-            ) if w not in punctuation_vocabulary and w not in data.PUNCTUATION_MAPPING and not w.startswith(data.PAUSE_PREFIX)] + [data.END]
-            pauses = [float(s.replace(data.PAUSE_PREFIX, "").replace(">", ""))
-                      for s in input_text.split() if s.startswith(data.PAUSE_PREFIX)]
+            text = [
+                w
+                for w in input_text.split()
+                if w not in punctuation_vocabulary
+                and w not in data.PUNCTUATION_MAPPING
+                and not w.startswith(data.PAUSE_PREFIX)
+            ] + [data.END]
+            pauses = [
+                float(s.replace(data.PAUSE_PREFIX, "").replace(">", ""))
+                for s in input_text.split()
+                if s.startswith(data.PAUSE_PREFIX)
+            ]
 
             text_with_punct = restore(
-                text, word_vocabulary, reverse_punctuation_vocabulary, net)
+                text, word_vocabulary, reverse_punctuation_vocabulary, net
+            )
             import nltk.data
-            punkt_tokenizer = nltk.data.load(
-                'tokenizers/punkt/russian.pickle')
+
+            punkt_tokenizer = nltk.data.load("tokenizers/punkt/russian.pickle")
             sentences = punkt_tokenizer.tokenize(text_with_punct)
             sentences = [sent.capitalize() for sent in sentences]
-            uppercase_text = ' '.join(sentences)
-            print("Текст успешно откорректирован:", uppercase_text)
+            uppercase_text = " ".join(sentences)
+            print(
+                Fore.BLUE + "Текст успешно откорректирован:",
+                uppercase_text + Style.RESET_ALL,
+            )
 
             keyboard.write(uppercase_text, delay=0)
 
