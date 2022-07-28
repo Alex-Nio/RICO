@@ -219,13 +219,30 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
                 return int(num)
 
             weather_data = initiate_take_weather_data(data, weather_now_value)
+
+            if weather_data[0][0] == "+":
+                temp = "Плюс"
+            elif weather_data[0][0] == "-":
+                temp = "Минус"
+
             weather_data = str(weather_data)
-            # TODO: написать условие для + и для -
-            print(weather_data + " Текущая погода")
+
+            # print(weather_data + " Текущая погода") # ['+21°']
             current_weather = convert_weather_data(weather_data)
+
+            # Результат склонения
+            declension = methods.numeral_noun_declension(
+                current_weather, "градус", "градуса", "градусов"
+            )
+
+            # Число в текст
             current_weather = num2text(current_weather)
-            result = f"В Белоозёрском сейчас: Плюс {current_weather} градусов."
-            tts.va_speak(result)  # Произносим погоду
+
+            # Результат
+            result = f"В Белоозёрском сейчас: {temp} {current_weather} {declension}."
+
+            # Произносим погоду
+            tts.va_speak(result)
         #! Расписание
         elif cmd == "time_management_cmd":
             tts.va_speak("Открываю расписание... ...")

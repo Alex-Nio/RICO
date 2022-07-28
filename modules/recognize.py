@@ -10,7 +10,7 @@ from modules import YASearch_commands
 from modules import wiki_parcer_commands
 from modules import reminder
 from modules import num_checker
-
+from colorama import Fore, Back, Style
 
 # ? Распознователь голоса
 def recognize_cmd(cmd: str):
@@ -70,8 +70,9 @@ def recognize_cmd(cmd: str):
                 rc["cmd"] = c
                 rc["percent"] = vrt
 
-    if rc["cmd"] != "":
-        print(f"{rc} : Процент распознования" + "\n")
+    # Логгер процентов распознования голоса
+    # if rc["cmd"] != "":
+    # print(Style.RESET_ALL + f"{rc} : Процент распознования" + "\n")
 
     return rc
 
@@ -128,9 +129,6 @@ def filter_cmd(raw_voice: str):
 
 # ? Распознование голоса
 def va_respond(voice: str):
-    if voice != "":
-        print("Входящая строка: " + f"{voice}")  # строка
-
     data = voice.split()
     # ? Преобразуем буквы в строке в цифры и возвращаем новый список:
     new_data = value_checker(data)
@@ -142,8 +140,16 @@ def va_respond(voice: str):
 
     # ? Логгер команд
     if cmd["cmd"] != "":
-        print("КОМАНДА---> " + " " + str(cmd["cmd"]))
-        # print("ПРОЦЕНТ СОВПАДЕНИЙ---> " + " " + str(cmd["percent"]))
+        print(Fore.RED + "КОМАНДА---> " + Back.GREEN + str(cmd["cmd"]))
+    if voice != "":
+        print(
+            "\033[43m"
+            + "Входящая строка:"
+            + Style.RESET_ALL
+            + f" {voice}"
+            + "\033[0m"
+            + "\n"
+        )  # строка
 
     #! Обращение к Рико
     if voice.startswith(config.VA_ALIAS):
