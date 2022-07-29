@@ -16,6 +16,17 @@ def execute_beh_cmd(cmd: str):
             tts.va_speak("Да да! я здесь!")
         elif cmd == "praise_cmd":
             tts.va_speak("Спасибо! Стараюсь!")
+        elif cmd == "admiration":
+            random_answer = randint(0, 3)
+
+            answers = [
+                "Всё хорошо, что хорошо кончается",
+                "А как же!",
+                "А разве может быть ина́че?",
+                "Уррааа",
+            ]
+
+            tts.va_speak(answers[random_answer])
         elif cmd == "rude":
             random_answer = randint(0, 9)
 

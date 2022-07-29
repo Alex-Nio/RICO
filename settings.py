@@ -1,5 +1,6 @@
 browser_start_page = "https://yandex.ru"
 vk_start_page = "https://vk.com/eterfox"
+youtube_start_page = "https://www.youtube.com"
 zoom_path = r"C:\Users\Nio\AppData\Roaming\Zoom\bin\Zoom_launcher.exe"
 telegram_path = r"D:\Programs\Telegram Desktop\Telegram.exe"
 horizon_path = (

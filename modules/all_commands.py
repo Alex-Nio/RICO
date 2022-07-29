@@ -1,10 +1,10 @@
 import subprocess
 import datetime
+import time
 import webbrowser
 import os
 import sys
 from threading import Thread
-
 import pyautogui
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +16,7 @@ import config
 from modules import num_checker  # pylint: disable=ungrouped-imports
 from modules import time_declination
 from modules import methods
+from modules import jokes
 from modules.sound import Sound
 import settings
 import pyjokes
@@ -68,7 +69,23 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
             KB.keyboard_press_val(counter, KB.keyboard_press_key("enter"))
         # ? Знак вопроса
         elif cmd == "question_mark_cmd":
-            KB.keyboard_press_val(counter, KB.keyboard_press_key("shift+?"))
+            import win32api
+
+            k_lang = win32api.GetKeyboardLayout()
+            lang = methods.check_keyboard_lang(k_lang)
+            print(lang)
+            if lang == "rus":
+                methods.setEngLayout()
+
+            KB.keyboard_press_key("shift+?")
+
+            # ru 68748313
+            # en 67699721
+            # Переключить на русскую
+
+            # Переключить на англ
+            # methods.setEngLayout()
+
         # ? Пробел
         elif cmd == "space_cmd":
             KB.keyboard_press_val(counter, KB.keyboard_press_key("space"))
@@ -77,6 +94,13 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         elif cmd == "escape_cmd":
             KB.keyboard_press_key("alt+f4")
             tts.va_speak("закрыла")
+        elif cmd == "save_cmd":
+            KB.keyboard_press_key("ctrl+s")
+            tts.va_speak("сохранено")
+        elif cmd == "save_and_exit_cmd":
+            KB.keyboard_press_key("ctrl+s")
+            KB.keyboard_press_key("alt+f4")
+            tts.va_speak("готово!")
         # ? Время
         elif cmd == "time_cmd":
             now = datetime.datetime.now()
@@ -118,6 +142,10 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
         elif cmd == "open_vk":
             webbrowser.open(settings.vk_start_page)
             tts.va_speak("открыла")
+        # ? Открыть Ютуб
+        elif cmd == "open_youtube":
+            webbrowser.open(settings.youtube_start_page)
+            tts.va_speak("открыла")
         # ? Обновить страницу
         elif cmd == "page_upd_cmd":
             KB.keyboard_press_key("ctrl+f5")
@@ -154,13 +182,12 @@ def execute_cmd(cmd: str, voice: str, new_data, counter):
             tts.va_speak("открыла")
         # ? Jokes
         elif cmd == "joke_cmd":
-
-            to_translate = pyjokes.get_joke()
-            translated = GoogleTranslator(source="auto", target="ru").translate(
-                to_translate
-            )
-            tts.va_speak(translated)
-
+            try:
+                joke = jokes.get_joke()
+                tts.va_speak(joke)
+            except Exception:
+                joke = jokes.get_joke()
+                tts.va_speak(joke)
         #! Плеер
         # ? Музыка
         elif cmd == "play_music_cmd":

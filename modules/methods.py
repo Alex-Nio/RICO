@@ -1,4 +1,7 @@
-#
+import win32api
+import win32gui
+
+
 # * cmd_content = текст голосовой команды
 # * alias_content = имена голосового помощника
 # * return data = Всё что идёт после голосовой команды
@@ -30,3 +33,25 @@ def numeral_noun_declension(
         and genetive_singular
         or nominative_plural
     )
+
+
+# Переключение раскладки клавиатуры
+# ---------------------------------------------------------
+def setCyrillicLayout():
+    window_handle = win32gui.GetForegroundWindow()
+    result = win32api.SendMessage(window_handle, 0x0050, 0, 0x04190419)
+    return result
+
+
+def setEngLayout():
+    window_handle = win32gui.GetForegroundWindow()
+    result = win32api.SendMessage(window_handle, 0x0050, 0, 0x04090409)
+    return result
+
+
+def check_keyboard_lang(lang):
+    if lang == 68748313:
+        k_l = "rus"
+    elif lang == 67699721:
+        k_l = "en"
+    return k_l
