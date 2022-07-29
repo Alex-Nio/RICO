@@ -19,7 +19,6 @@ from modules import methods
 from modules import jokes
 from modules.sound import Sound
 import settings
-import pyjokes
 from deep_translator import GoogleTranslator
 from modules.workflow_functions import check_wf
 
